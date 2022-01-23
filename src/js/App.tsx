@@ -29,7 +29,7 @@ function App() {
           <span>{'='}</span>
           <Vector3Input label={'result'} vector={result} setVector={(x) => {}} />
           <span>{'='}</span>
-          <span>{result.z}</span>
+          <span className="limited-decimal-places">{result.z}</span>
           <Vector3Input label={'result'} vector={homogenizedResult} setVector={(x) => {}} />
         </div>
       </header>

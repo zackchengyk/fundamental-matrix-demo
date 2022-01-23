@@ -17,7 +17,7 @@ function Vector3Input({ label, vector, setVector }: Vector3InputProps) {
           gridTemplate: 'repeat(3, 1fr) / auto',
         }}>
         {vector.toArray().map((x, i) => (
-          <span key={i} className="matrix-element">
+          <span key={i} className="limited-decimal-places">
             {showNumber(x)}
           </span>
         ))}

@@ -17,7 +17,7 @@ function Matrix3Input({ label, matrix, setMatrix }: Matrix3InputProps) {
           gridTemplate: 'repeat(3, 1fr) / repeat(3, auto)',
         }}>
         {matrix.elements.map((x, i) => (
-          <span key={i} className="matrix-element">
+          <span key={i} className="limited-decimal-places">
             {showNumber(x)}
           </span>
         ))}

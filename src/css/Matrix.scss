@@ -56,5 +56,8 @@ $matrix-brace-border: 2px solid $text-color;
   font-size: $text-size;
 }
 
-.matrix-element {
+.limited-decimal-places {
+  max-width: 8ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
