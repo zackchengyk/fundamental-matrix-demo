@@ -38,21 +38,29 @@
   }
 }
 
-#container {
-  position: relative;
-  height: max(50vh, 300px);
-  width: min(100vw, 600px);
+#container-container {
+  display: grid;
+  grid-template: max(50vh, 300px) / repeat(2, minmax(0, 1fr));
+  width: min(100%, 1000px);
+  place-items: stretch;
+  gap: 10px;
 }
 
-#canvas {
+.container {
+  position: relative;
+}
+
+.canvas {
   height: 100%;
   width: 100%;
   background-color: $black;
 }
 
-#target {
+.target {
   position: absolute;
   inset: 0;
+  z-index: 10;
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -61,7 +69,14 @@
     content: '';
     width: 100%;
     border-radius: 50%;
-    background-color: color.change($blue-light, $alpha: 0.75);
     padding-top: 100%;
+  }
+
+  &.blue::before {
+    background-color: color.change($blue-light, $alpha: 0.75);
+  }
+
+  &.green::before {
+    background-color: color.change($green-light, $alpha: 0.75);
   }
 }
