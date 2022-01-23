@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;325;350;375;400;425;450;475;500;525;550;575;600;625;650;675;700;725;750;775;800&display=swap');
+
 $white: #ffffff;
 $light-light: #fff5f0;
 $light: #ffeee1;
@@ -14,5 +16,14 @@ $dark: #1a1717;
 $dark-dark: #141212;
 $black: #000000;
 
+$blue-white: #93dbff;
+$blue-light-light: #0095f3;
+$blue-light: #0082e7;
+$blue-dark: #003c75;
+$blue-dark-dark: #002a5b;
+$blue-black: #002557;
+
 $background-color: $dark;
 $text-color: $light-dark-dark;
+
+$monospace: 'JetBrains Mono', monospace;

@@ -16,8 +16,8 @@ function Matrix4Display({ label, matrix }: Matrix4DisplayProps) {
           gridTemplate: 'repeat(4, 1fr) / repeat(4, auto)',
         }}>
         {matrix.elements.map((x, i) => (
-          <span key={i} className="limit-dp" style={{ maxWidth: limitDpHelper(x) }}>
-            {x}
+          <span key={i} className="limit-dp">
+            {limitDpHelper(x)}
           </span>
         ))}
       </div>

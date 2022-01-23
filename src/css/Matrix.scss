@@ -1,25 +1,43 @@
 @use 'sass:math';
 @import './common.scss';
 
-$text-size: 1.25rem;
-$label-text-size: 1.25rem;
+$text-font-size: 1rem;
+$text-font-weight: 450;
+
+$label-font-size: 0.75rem;
+$label-font-weight: 450;
+
 $matrix-brace-border: 2px solid $text-color;
 
 .matrix-equation {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
 
   gap: 1ch;
 
-  font-family: monospace;
-  font-size: $text-size;
+  font-family: $monospace;
+  font-size: $text-font-size;
+  font-weight: $text-font-weight;
   color: $text-color;
+
+  margin: 2ch;
+  overflow-x: scroll;
+
+  > * {
+    flex-shrink: 0;
+  }
 
   > span {
     position: relative;
-    top: 1ch;
+    top: 1.5ch;
+  }
+
+  > :last-child .limit-dp {
+    &:nth-of-type(1),
+    &:nth-of-type(2) {
+      color: $blue-light;
+    }
   }
 }
 
@@ -29,7 +47,9 @@ $matrix-brace-border: 2px solid $text-color;
   grid-template-columns: 1.25ch auto 1.25ch;
   gap: 2ch 0.75ch;
 
-  font-size: math.div($text-size, 2);
+  text-align: center;
+  font-size: $label-font-size;
+  font-weight: $label-font-weight;
 
   &::before,
   &::after {
@@ -53,11 +73,9 @@ $matrix-brace-border: 2px solid $text-color;
   grid-auto-flow: column;
   gap: 1ch 1.25ch;
 
-  font-family: monospace;
-  font-size: $text-size;
+  font-size: $text-font-size;
 }
 
 .limit-dp {
-  overflow: hidden;
-  text-overflow: ellipsis;
+  width: 7ch;
 }

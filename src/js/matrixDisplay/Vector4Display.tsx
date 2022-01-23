@@ -16,8 +16,8 @@ function Vector3Display({ label, vector }: Vector3DisplayProps) {
           gridTemplate: 'repeat(4, 1fr) / auto',
         }}>
         {vector.toArray().map((x, i) => (
-          <span key={i} className="limit-dp" style={{ maxWidth: limitDpHelper(x) }}>
-            {x}
+          <span key={i} className="limit-dp">
+            {limitDpHelper(x)}
           </span>
         ))}
       </div>
