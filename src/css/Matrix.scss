@@ -1,0 +1,60 @@
+@use 'sass:math';
+@import './common.scss';
+
+$text-size: 1.25rem;
+$label-text-size: 1.25rem;
+$matrix-brace-border: 2px solid $text-color;
+
+.matrix-equation {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+
+  gap: 1ch;
+
+  font-family: monospace;
+  font-size: $text-size;
+  color: $text-color;
+
+  > span {
+    position: relative;
+    top: 1ch;
+  }
+}
+
+.matrix {
+  display: inline-grid;
+  grid-template-areas: 'a a a' 'b c d';
+  grid-template-columns: 1.25ch auto 1.25ch;
+  gap: 2ch 0.75ch;
+
+  font-size: math.div($text-size, 2);
+
+  &::before,
+  &::after {
+    content: '';
+    font-size: 0.5rem;
+    border: $matrix-brace-border;
+  }
+  &::before {
+    border-right: none;
+  }
+  &::after {
+    border-left: none;
+  }
+}
+
+.matrix-elements {
+  padding: 0.75ch 0.5ch;
+
+  display: grid;
+  grid-auto-flow: column;
+  gap: 1ch 1.25ch;
+
+  font-family: monospace;
+  font-size: $text-size;
+}
+
+.matrix-element {
+}
