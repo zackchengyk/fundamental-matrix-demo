@@ -1,19 +1,19 @@
 import * as THREE from 'three'
 import { limitDpHelper } from './common'
 
-type Matrix3DisplayProps = {
+type Matrix4DisplayProps = {
   label: string
-  matrix: THREE.Matrix3
+  matrix: THREE.Matrix4
 }
 
-function Matrix3Display({ label, matrix }: Matrix3DisplayProps) {
+function Matrix4Display({ label, matrix }: Matrix4DisplayProps) {
   return (
     <div className="matrix">
       <div style={{ gridArea: 'a' }}>{label}</div>
       <div
         className="matrix-elements"
         style={{
-          gridTemplate: 'repeat(3, 1fr) / repeat(3, auto)',
+          gridTemplate: 'repeat(4, 1fr) / repeat(4, auto)',
         }}>
         {matrix.elements.map((x, i) => (
           <span key={i} className="limit-dp" style={{ maxWidth: limitDpHelper(x) }}>
@@ -25,4 +25,4 @@ function Matrix3Display({ label, matrix }: Matrix3DisplayProps) {
   )
 }
 
-export default Matrix3Display
+export default Matrix4Display

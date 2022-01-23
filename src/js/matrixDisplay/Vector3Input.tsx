@@ -1,13 +1,12 @@
 import * as THREE from 'three'
-import { showNumber } from './common'
+import { limitDpHelper } from './common'
 
-type Vector3InputProps = {
+type Vector3DisplayProps = {
   label: string
   vector: THREE.Vector3
-  setVector: (m: THREE.Vector3) => void
 }
 
-function Vector3Input({ label, vector, setVector }: Vector3InputProps) {
+function Vector3Display({ label, vector }: Vector3DisplayProps) {
   return (
     <div className="matrix">
       <div style={{ gridArea: 'a' }}>{label}</div>
@@ -17,8 +16,8 @@ function Vector3Input({ label, vector, setVector }: Vector3InputProps) {
           gridTemplate: 'repeat(3, 1fr) / auto',
         }}>
         {vector.toArray().map((x, i) => (
-          <span key={i} className="limited-decimal-places">
-            {showNumber(x)}
+          <span key={i} className="limit-dp" style={{ maxWidth: limitDpHelper(x) }}>
+            {x}
           </span>
         ))}
       </div>
@@ -26,4 +25,4 @@ function Vector3Input({ label, vector, setVector }: Vector3InputProps) {
   )
 }
 
-export default Vector3Input
+export default Vector3Display

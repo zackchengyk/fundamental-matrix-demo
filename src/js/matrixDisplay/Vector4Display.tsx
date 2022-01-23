@@ -1,21 +1,21 @@
 import * as THREE from 'three'
 import { limitDpHelper } from './common'
 
-type Matrix3DisplayProps = {
+type Vector3DisplayProps = {
   label: string
-  matrix: THREE.Matrix3
+  vector: THREE.Vector4
 }
 
-function Matrix3Display({ label, matrix }: Matrix3DisplayProps) {
+function Vector3Display({ label, vector }: Vector3DisplayProps) {
   return (
     <div className="matrix">
       <div style={{ gridArea: 'a' }}>{label}</div>
       <div
         className="matrix-elements"
         style={{
-          gridTemplate: 'repeat(3, 1fr) / repeat(3, auto)',
+          gridTemplate: 'repeat(4, 1fr) / auto',
         }}>
-        {matrix.elements.map((x, i) => (
+        {vector.toArray().map((x, i) => (
           <span key={i} className="limit-dp" style={{ maxWidth: limitDpHelper(x) }}>
             {x}
           </span>
@@ -25,4 +25,4 @@ function Matrix3Display({ label, matrix }: Matrix3DisplayProps) {
   )
 }
 
-export default Matrix3Display
+export default Vector3Display

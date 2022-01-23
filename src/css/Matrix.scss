@@ -49,6 +49,7 @@ $matrix-brace-border: 2px solid $text-color;
   padding: 0.75ch 0.5ch;
 
   display: grid;
+  place-items: center;
   grid-auto-flow: column;
   gap: 1ch 1.25ch;
 
@@ -56,8 +57,7 @@ $matrix-brace-border: 2px solid $text-color;
   font-size: $text-size;
 }
 
-.limited-decimal-places {
-  max-width: 8ch;
+.limit-dp {
   overflow: hidden;
   text-overflow: ellipsis;
 }
