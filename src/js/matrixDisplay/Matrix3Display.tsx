@@ -16,8 +16,8 @@ function Matrix3Display({ label, matrix }: Matrix3DisplayProps) {
           gridTemplate: 'repeat(3, 1fr) / repeat(3, auto)',
         }}>
         {matrix.elements.map((x, i) => (
-          <span key={i} className="limit-dp" style={{ maxWidth: limitDpHelper(x) }}>
-            {x}
+          <span key={i} className="limit-dp">
+            {limitDpHelper(x)}
           </span>
         ))}
       </div>

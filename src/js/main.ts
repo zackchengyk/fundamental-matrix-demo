@@ -12,6 +12,8 @@ export type DemoType = {
   scene: THREE.Scene
   pointPosition: THREE.Vector3
   updateFunction: (d: DemoType) => void
+  rotationMatrix: THREE.Matrix4
+  translationCrossMatrix: THREE.Matrix3
   // Animation data
   nextFrameReq: number
   prevTime: DOMHighResTimeStamp
@@ -77,7 +79,7 @@ function init(
 
     // Camera
     const camera = new THREE.PerspectiveCamera(30, aspect, 0.0001, 10000)
-    camera.position.set(5, 5, 5 - i * 2.5) // Set position like this
+    camera.position.set(0, 0, 5) // Set position like this
     camera.lookAt(new THREE.Vector3(0, 0, 0))
     camera.layers.set(i)
 
@@ -130,6 +132,8 @@ function init(
     scene,
     pointPosition: mesh.position,
     updateFunction: (d) => {},
+    rotationMatrix: new THREE.Matrix4(),
+    translationCrossMatrix: new THREE.Matrix3(),
     nextFrameReq: 0,
     prevTime: 0,
     cameraData,
@@ -149,7 +153,7 @@ function render(time: DOMHighResTimeStamp, demo: DemoType): void {
   // const deltaTime = time - demo.prevTime
   demo.prevTime = time
 
-  demo.pointPosition.y = 2 + Math.sin(time * 0.0015) * 2
+  // demo.pointPosition.y = 2 + Math.sin(time * 0.0015) * 2
 
   // For each camera
   for (let i = 0; i < demo.cameraData.length; i++) {
@@ -183,6 +187,18 @@ function render(time: DOMHighResTimeStamp, demo: DemoType): void {
     // Render
     renderer.render(demo.scene, data.camera)
   }
+
+  // Find translation between cameras
+  const t = demo.cameraData[1].camera.position.clone().sub(demo.cameraData[0].camera.position)
+  demo.translationCrossMatrix.set(0, -t.z, t.y, t.z, 0, -t.x, -t.y, t.x, 0)
+
+  // Find rotation between cameras
+  const r0 = new THREE.Quaternion()
+  demo.cameraData[0].camera.getWorldQuaternion(r0)
+  const r1 = new THREE.Quaternion()
+  demo.cameraData[1].camera.getWorldQuaternion(r1)
+  r0.multiply(r1.invert())
+  demo.rotationMatrix.makeRotationFromQuaternion(r0)
 
   demo.updateFunction(demo)
 }

@@ -1,13 +1,13 @@
 import * as THREE from 'three'
 import { limitDpHelper } from './common'
 
-type Vector3DisplayProps = {
+type Vector4DisplayProps = {
   label: string
   vector: THREE.Vector4
   className?: string
 }
 
-function Vector3Display({ label, vector, className }: Vector3DisplayProps) {
+function Vector4Display({ label, vector, className }: Vector4DisplayProps) {
   return (
     <div className={'matrix ' + className}>
       <div style={{ gridArea: 'a' }}>{label}</div>
@@ -26,4 +26,4 @@ function Vector3Display({ label, vector, className }: Vector3DisplayProps) {
   )
 }
 
-export default Vector3Display
+export default Vector4Display

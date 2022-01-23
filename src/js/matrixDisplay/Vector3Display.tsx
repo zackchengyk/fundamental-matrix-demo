@@ -4,11 +4,12 @@ import { limitDpHelper } from './common'
 type Vector3DisplayProps = {
   label: string
   vector: THREE.Vector3
+  className?: string
 }
 
-function Vector3Display({ label, vector }: Vector3DisplayProps) {
+function Vector3Display({ label, vector, className }: Vector3DisplayProps) {
   return (
-    <div className="matrix">
+    <div className={'matrix ' + className}>
       <div style={{ gridArea: 'a' }}>{label}</div>
       <div
         className="matrix-elements"
@@ -16,8 +17,8 @@ function Vector3Display({ label, vector }: Vector3DisplayProps) {
           gridTemplate: 'repeat(3, 1fr) / auto',
         }}>
         {vector.toArray().map((x, i) => (
-          <span key={i} className="limit-dp" style={{ maxWidth: limitDpHelper(x) }}>
-            {x}
+          <span key={i} className="limit-dp">
+            {limitDpHelper(x)}
           </span>
         ))}
       </div>
