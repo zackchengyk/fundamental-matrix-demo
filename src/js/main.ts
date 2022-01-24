@@ -177,11 +177,12 @@ function render(time: DOMHighResTimeStamp, demo: DemoType): void {
     const lineDir = demo.pointPosition.clone().sub(data.camera.position)
     const startPos = data.camera.position.clone().add(lineDir.clone().multiplyScalar(-1000))
     const endPos = data.camera.position.clone().add(lineDir.clone().multiplyScalar(1000))
-    linePosArray[0] = startPos.x
-    linePosArray[1] = startPos.y
-    linePosArray[2] = startPos.z
-    linePosArray[3] = endPos.x
-    linePosArray[4] = endPos.y
+    // @ts-ignore
+    linePosArray[0] = startPos.x // @ts-ignore
+    linePosArray[1] = startPos.y // @ts-ignore
+    linePosArray[2] = startPos.z // @ts-ignore
+    linePosArray[3] = endPos.x // @ts-ignore
+    linePosArray[4] = endPos.y // @ts-ignore
     linePosArray[5] = endPos.z
     data.line.geometry.attributes.position.needsUpdate = true
 
