@@ -1,16 +1,18 @@
+@use 'sass:color';
 @use 'sass:math';
 @import './common.scss';
 
 $matrix-brace-border: 1px solid $line-color;
 
 .matrix-equation {
+  background-color: color.mix($dark, $dark-dark, 50%);
+  padding: $gap;
+
   display: flex;
   flex-direction: row;
   align-items: center;
 
   gap: 1ch;
-
-  margin: 2ch;
   overflow-x: scroll;
 
   > * {
@@ -20,19 +22,30 @@ $matrix-brace-border: 1px solid $line-color;
   > span {
     position: relative;
     top: 1.125rem;
+
+    font-weight: $text-bold-font-weight;
+    color: $text-bold-color;
   }
 }
 
-.blue .limit-dp {
-  &:nth-of-type(1),
-  &:nth-of-type(2) {
+.blue {
+  &.all .limit-dp,
+  &.all .matrix-label {
+    color: $blue-light;
+  }
+  .limit-dp:nth-of-type(1),
+  .limit-dp:nth-of-type(2) {
     color: $blue-light;
   }
 }
 
-.green .limit-dp {
-  &:nth-of-type(1),
-  &:nth-of-type(2) {
+.green {
+  &.all .limit-dp,
+  &.all .matrix-label {
+    color: $green-light;
+  }
+  .limit-dp:nth-of-type(1),
+  .limit-dp:nth-of-type(2) {
     color: $green-light;
   }
 }
@@ -42,12 +55,6 @@ $matrix-brace-border: 1px solid $line-color;
   grid-template-areas: 'a a a' 'b c d';
   grid-template-columns: 1.25ch auto 1.25ch;
   gap: 2ch 0.75ch;
-
-  .matrix-label {
-    grid-area: a;
-    font-size: $label-font-size;
-    font-weight: $label-font-weight;
-  }
 
   &::before,
   &::after {
@@ -61,6 +68,12 @@ $matrix-brace-border: 1px solid $line-color;
   &::after {
     border-left: none;
   }
+}
+
+.matrix-label {
+  grid-area: a;
+  font-size: $label-font-size;
+  font-weight: $label-font-weight;
 }
 
 .matrix-elements {

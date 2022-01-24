@@ -1,6 +1,7 @@
 @use 'sass:color';
 @import './common.scss';
 
+body,
 #root {
   background-color: $dark;
 
@@ -12,9 +13,6 @@
   @supports (-webkit-touch-callout: none) {
     height: -webkit-fill-available;
   }
-
-  display: grid;
-  place-items: center;
 }
 
 .App {
@@ -24,6 +22,7 @@
 
   display: grid;
   grid-template-areas: 'a' 'b';
+  grid-template-rows: 35% 1fr;
   place-items: start center;
   gap: $gap;
 }
@@ -35,6 +34,8 @@
   overflow-y: scroll;
 
   > #scroll-inner {
+    padding: $gap;
+
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -48,7 +49,8 @@
 
 #container-container {
   display: grid;
-  grid-template: max(40vh, 300px) / repeat(2, minmax(0, 1fr));
+  grid-template: minmax(0, 1fr) / repeat(2, minmax(0, 1fr));
+  height: 100%;
   width: min(100%, 1000px);
   place-items: stretch;
   gap: $gap;
