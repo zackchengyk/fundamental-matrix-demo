@@ -9,7 +9,7 @@ type Matrix4DisplayProps = {
 function Matrix4Display({ label, matrix }: Matrix4DisplayProps) {
   return (
     <div className="matrix">
-      <div style={{ gridArea: 'a' }}>{label}</div>
+      <div className="matrix-label">{label}</div>
       <div
         className="matrix-elements"
         style={{

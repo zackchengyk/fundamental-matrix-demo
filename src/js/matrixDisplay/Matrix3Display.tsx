@@ -9,7 +9,7 @@ type Matrix3DisplayProps = {
 function Matrix3Display({ label, matrix }: Matrix3DisplayProps) {
   return (
     <div className="matrix">
-      <div style={{ gridArea: 'a' }}>{label}</div>
+      <div className="matrix-label">{label}</div>
       <div
         className="matrix-elements"
         style={{

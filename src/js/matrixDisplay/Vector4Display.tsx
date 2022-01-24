@@ -10,7 +10,7 @@ type Vector4DisplayProps = {
 function Vector4Display({ label, vector, className }: Vector4DisplayProps) {
   return (
     <div className={'matrix ' + className}>
-      <div style={{ gridArea: 'a' }}>{label}</div>
+      <div className="matrix-label">{label}</div>
       <div
         className="matrix-elements"
         style={{

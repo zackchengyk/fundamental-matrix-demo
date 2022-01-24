@@ -1,13 +1,7 @@
 @use 'sass:math';
 @import './common.scss';
 
-$text-font-size: 1rem;
-$text-font-weight: 450;
-
-$label-font-size: 0.75rem;
-$label-font-weight: 450;
-
-$matrix-brace-border: 2px solid $text-color;
+$matrix-brace-border: 1px solid $line-color;
 
 .matrix-equation {
   display: flex;
@@ -15,11 +9,6 @@ $matrix-brace-border: 2px solid $text-color;
   align-items: center;
 
   gap: 1ch;
-
-  font-family: $monospace;
-  font-size: $text-font-size;
-  font-weight: $text-font-weight;
-  color: $text-color;
 
   margin: 2ch;
   overflow-x: scroll;
@@ -30,7 +19,7 @@ $matrix-brace-border: 2px solid $text-color;
 
   > span {
     position: relative;
-    top: 1.5ch;
+    top: 1.125rem;
   }
 }
 
@@ -54,9 +43,11 @@ $matrix-brace-border: 2px solid $text-color;
   grid-template-columns: 1.25ch auto 1.25ch;
   gap: 2ch 0.75ch;
 
-  text-align: center;
-  font-size: $label-font-size;
-  font-weight: $label-font-weight;
+  .matrix-label {
+    grid-area: a;
+    font-size: $label-font-size;
+    font-weight: $label-font-weight;
+  }
 
   &::before,
   &::after {
