@@ -6,7 +6,7 @@ import * as THREE from 'three'
 import Matrix4Display from './matrixDisplay/Matrix4Display'
 import Vector4Display from './matrixDisplay/Vector4Display'
 import { limitDpHelper } from './matrixDisplay/common'
-import { DemoType, main } from './main'
+import { DemoType, main } from './stereoSetup/main'
 import Matrix3Display from './matrixDisplay/Matrix3Display'
 import Vector3Display from './matrixDisplay/Vector3Display'
 
@@ -71,7 +71,7 @@ function App() {
       canvas2Ref.current
     )
 
-    function updateFunction(d: DemoType) {
+    function updateGUIFunction(d: DemoType) {
       setK(d.cameraData[0].intrinsicMatrix)
       setM(d.cameraData[0].extrinsicMatrix)
 
@@ -81,9 +81,9 @@ function App() {
       setX(new THREE.Vector4(d.pointPosition.x, d.pointPosition.y, d.pointPosition.z, 1))
     }
 
-    updateFunction(demoRef.current)
+    updateGUIFunction(demoRef.current)
 
-    demoRef.current.updateFunction = updateFunction
+    demoRef.current.updateGUIFunction = updateGUIFunction
   }, [])
 
   return (
