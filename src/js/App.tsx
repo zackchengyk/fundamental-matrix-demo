@@ -11,6 +11,19 @@ import Matrix33Display from './matrixDisplay/Matrix33Display'
 import Vector3Display from './matrixDisplay/Vector3Display'
 import Matrix34Display from './matrixDisplay/Matrix34Display'
 
+function Target({ x, y, className }: { x: number; y: number; className: string }) {
+  // Bottom left = [1,1]
+  // Top right = [-1,-1]
+  return (
+    <div
+      className={'target ' + className}
+      style={{
+        transform: `translate(${-x * 50}%, ${y * 50 || 0}%) scale(0.02)`,
+      }}
+    />
+  )
+}
+
 function App() {
   // References
   const demoRef = useRef<DemoType>()
@@ -55,10 +68,10 @@ function App() {
   const Ft = F.clone().transpose()
 
   // Lines
-  const l = xp.clone().applyMatrix3(F)
-  const lPoints = new THREE.Vector3((l.x - l.z) / l.y, 0, (-l.x - l.z) / l.y)
-  const lp = x.clone().applyMatrix3(Ft)
-  const lpPoints = new THREE.Vector3((lp.x - lp.z) / lp.y, 0, (-lp.x - lp.z) / lp.y)
+  const l = xp.applyMatrix3(F)
+  const lFunction = (x: number): number => (-l.z - l.x * x) / l.y
+  const lp = x.applyMatrix3(Ft)
+  const lpFunction = (x: number): number => (-lp.z - lp.x * x) / lp.y
 
   useEffect(() => {
     demoRef.current = main(container1Ref.current, canvas1Ref.current, container2Ref.current, canvas2Ref.current)
@@ -81,45 +94,15 @@ function App() {
       <div id="container-container">
         <div className="container" ref={container1Ref}>
           <canvas className="canvas" ref={canvas1Ref} />
-          <div
-            className="target blue"
-            style={{
-              transform: `translate(${-homogenizedResult.x * 50}%, ${homogenizedResult.y * 50}%) scale(0.02)`,
-            }}
-          />
-          <div
-            className="target green"
-            style={{
-              transform: `translate(${50}%, ${lPoints.x * 50 || 0}%) scale(0.02)`,
-            }}
-          />
-          <div
-            className="target green"
-            style={{
-              transform: `translate(${-50}%, ${lPoints.z * 50 || 0}%) scale(0.02)`,
-            }}
-          />
+          <Target x={homogenizedResult.x} y={homogenizedResult.y} className="blue" />
+          <Target x={-1} y={lFunction(-1)} className="green" />
+          <Target x={1} y={lFunction(1)} className="green" />
         </div>
         <div className="container" ref={container2Ref}>
           <canvas className="canvas" ref={canvas2Ref} />
-          <div
-            className="target green"
-            style={{
-              transform: `translate(${-homogenizedResultp.x * 50}%, ${homogenizedResultp.y * 50}%) scale(0.02)`,
-            }}
-          />
-          <div
-            className="target blue"
-            style={{
-              transform: `translate(${50}%, ${lpPoints.x * 50 || 0}%) scale(0.02)`,
-            }}
-          />
-          <div
-            className="target blue"
-            style={{
-              transform: `translate(${-50}%, ${lpPoints.z * 50 || 0}%) scale(0.02)`,
-            }}
-          />
+          <Target x={homogenizedResultp.x} y={homogenizedResultp.y} className="green" />
+          <Target x={-1} y={lpFunction(-1)} className="blue" />
+          <Target x={1} y={lpFunction(1)} className="blue" />
         </div>
       </div>
 
@@ -330,7 +313,7 @@ function App() {
             <span>{'*'}</span>
             <Vector3Display label={"x'"} vector={xp} className="green" />
             <span>{'='}</span>
-            <Vector3Display label={'l'} vector={l} className="blue all" />
+            <Vector3Display label={'l'} vector={l} className="green all" />
           </div>
 
           <div className="matrix-equation">
@@ -338,7 +321,7 @@ function App() {
             <span>{'*'}</span>
             <Vector3Display label={'x'} vector={x} className="blue" />
             <span>{'='}</span>
-            <Vector3Display label={"l'"} vector={l} className="green all" />
+            <Vector3Display label={"l'"} vector={lp} className="blue all" />
           </div>
 
           <div className="text">

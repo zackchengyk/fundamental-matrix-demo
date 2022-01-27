@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 
-const charWidth = 6
+const charWidth = 5
 const regex = /^(-?)0(\.)/
 
 // Helper to display a float either as zero, or with up to charWidth number of characters (including ellipses)

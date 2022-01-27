@@ -54,8 +54,8 @@ $matrix-brace-border: 1px solid $line-color;
 .matrix {
   display: inline-grid;
   grid-template-areas: 'a a a' 'b c d';
-  grid-template-columns: 1.25ch auto 1.25ch;
-  gap: 2ch 0.75ch;
+  grid-template-columns: 1ch auto 1ch;
+  gap: 2ch 0.25ch;
 
   &::before,
   &::after {
@@ -85,11 +85,9 @@ $matrix-brace-border: 1px solid $line-color;
   display: grid;
   place-items: center;
   grid-auto-flow: column;
-  gap: 1ch 1.25ch;
-
-  font-size: $text-font-size;
+  gap: 1ch 1ch;
 }
 
 .limit-dp {
-  min-width: 6ch;
+  min-width: 5ch;
 }
