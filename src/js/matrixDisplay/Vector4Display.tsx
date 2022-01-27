@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { limitDpHelper } from './common'
+import MatrixHelper from './MatrixHelper'
 
 type Vector4DisplayProps = {
   label: string
@@ -9,20 +9,14 @@ type Vector4DisplayProps = {
 
 function Vector4Display({ label, vector, className }: Vector4DisplayProps) {
   return (
-    <div className={'matrix ' + className}>
-      <div className="matrix-label">{label}</div>
-      <div
-        className="matrix-elements"
-        style={{
-          gridTemplate: 'repeat(4, 1fr) / auto',
-        }}>
-        {vector.toArray().map((x, i) => (
-          <span key={i} className="limit-dp">
-            {limitDpHelper(x)}
-          </span>
-        ))}
-      </div>
-    </div>
+    <MatrixHelper
+      label={label}
+      array={vector.toArray()}
+      className={className}
+      style={{
+        gridTemplate: 'repeat(4, 1fr) / auto',
+      }}
+    />
   )
 }
 

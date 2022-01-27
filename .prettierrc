@@ -1,7 +1,7 @@
 {
   "tabWidth": 2,
   "useTabs": false,
-  "printWidth": 110,
+  "printWidth": 115,
   "singleQuote": true,
   "arrowParens": "always",
   "bracketSameLine": true,

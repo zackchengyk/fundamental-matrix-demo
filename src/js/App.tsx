@@ -3,16 +3,13 @@ import '../css/App.scss'
 import '../css/Matrix.scss'
 
 import * as THREE from 'three'
-import Matrix4Display from './matrixDisplay/Matrix4Display'
+import Matrix44Display from './matrixDisplay/Matrix44Display'
 import Vector4Display from './matrixDisplay/Vector4Display'
-import { limitDpHelper } from './matrixDisplay/common'
+import { crossProductMatrixHelper, intrinsicHelper, limitDpHelper } from './common'
 import { DemoType, main } from './stereoSetup/main'
-import Matrix3Display from './matrixDisplay/Matrix3Display'
+import Matrix33Display from './matrixDisplay/Matrix33Display'
 import Vector3Display from './matrixDisplay/Vector3Display'
-
-function getCrossProductMatrix(T: THREE.Vector3): THREE.Matrix3 {
-  return new THREE.Matrix3().fromArray([0, -T.z, T.y, T.z, 0, -T.x, -T.y, T.x, 0])
-}
+import Matrix34Display from './matrixDisplay/Matrix34Display'
 
 function App() {
   // References
@@ -24,18 +21,18 @@ function App() {
 
   // States, camera 1
   const [X, setX] = useState<THREE.Vector4>(new THREE.Vector4())
-  const [K, setK] = useState<THREE.Matrix4>(new THREE.Matrix4())
+  const [K, setK] = useState<THREE.Matrix3>(new THREE.Matrix3())
   const [M, setM] = useState<THREE.Matrix4>(new THREE.Matrix4())
-  const KM = K.clone().multiply(M)
-  const result = X.clone().applyMatrix4(KM)
+  const MX = X.clone().applyMatrix4(M)
+  const result = new THREE.Vector3(MX.x, MX.y, MX.z).applyMatrix3(K)
   const homogenizedResult = result.clone().divideScalar(result.z)
   const x = new THREE.Vector3(homogenizedResult.x, homogenizedResult.y, homogenizedResult.z)
 
   // States, camera 2
-  const [Kp, setKp] = useState<THREE.Matrix4>(new THREE.Matrix4())
+  const [Kp, setKp] = useState<THREE.Matrix3>(new THREE.Matrix3())
   const [Mp, setMp] = useState<THREE.Matrix4>(new THREE.Matrix4())
-  const KpMp = Kp.clone().multiply(Mp)
-  const resultp = X.clone().applyMatrix4(KpMp)
+  const MpX = X.clone().applyMatrix4(Mp)
+  const resultp = new THREE.Vector3(MpX.x, MpX.y, MpX.z).applyMatrix3(Kp)
   const homogenizedResultp = resultp.clone().divideScalar(resultp.z)
   const xp = new THREE.Vector3(homogenizedResultp.x, homogenizedResultp.y, homogenizedResultp.z)
 
@@ -48,11 +45,11 @@ function App() {
   // Decomposed into R and T
   const R = Rt.clone().transpose()
   const T = minusRtT.clone().multiplyScalar(-1).applyMatrix3(R)
-  const T_x = getCrossProductMatrix(T)
+  const T_x = crossProductMatrixHelper(T)
 
   // Essential and Fundamental Matrices
-  const Kit = new THREE.Matrix3().setFromMatrix4(K).invert().transpose()
-  const Kpi = new THREE.Matrix3().setFromMatrix4(Kp).invert()
+  const Kit = K.clone().invert().transpose()
+  const Kpi = Kp.clone().invert()
   const E = T_x.clone().multiply(R)
   const F = Kit.clone().multiply(E).multiply(Kpi)
   const Ft = F.clone().transpose()
@@ -64,20 +61,13 @@ function App() {
   const lpPoints = new THREE.Vector3((lp.x - lp.z) / lp.y, 0, (-lp.x - lp.z) / lp.y)
 
   useEffect(() => {
-    demoRef.current = main(
-      container1Ref.current,
-      canvas1Ref.current,
-      container2Ref.current,
-      canvas2Ref.current
-    )
+    demoRef.current = main(container1Ref.current, canvas1Ref.current, container2Ref.current, canvas2Ref.current)
 
     function updateGUIFunction(d: DemoType) {
-      setK(d.cameraData[0].intrinsicMatrix)
+      setK(intrinsicHelper(d.cameraData[0].intrinsicMatrix))
       setM(d.cameraData[0].extrinsicMatrix)
-
-      setKp(d.cameraData[1].intrinsicMatrix)
+      setKp(intrinsicHelper(d.cameraData[1].intrinsicMatrix))
       setMp(d.cameraData[1].extrinsicMatrix)
-
       setX(new THREE.Vector4(d.pointPosition.x, d.pointPosition.y, d.pointPosition.z, 1))
     }
 
@@ -94,19 +84,19 @@ function App() {
           <div
             className="target blue"
             style={{
-              transform: `translate(${homogenizedResult.x * 50}%, ${-homogenizedResult.y * 50}%) scale(0.02)`,
+              transform: `translate(${-homogenizedResult.x * 50}%, ${homogenizedResult.y * 50}%) scale(0.02)`,
             }}
           />
           <div
             className="target green"
             style={{
-              transform: `translate(${-50}%, ${-lPoints.x * 50 || 0}%) scale(0.02)`,
+              transform: `translate(${50}%, ${lPoints.x * 50 || 0}%) scale(0.02)`,
             }}
           />
           <div
             className="target green"
             style={{
-              transform: `translate(${50}%, ${-lPoints.z * 50 || 0}%) scale(0.02)`,
+              transform: `translate(${-50}%, ${lPoints.z * 50 || 0}%) scale(0.02)`,
             }}
           />
         </div>
@@ -115,21 +105,19 @@ function App() {
           <div
             className="target green"
             style={{
-              transform: `translate(${homogenizedResultp.x * 50}%, ${
-                -homogenizedResultp.y * 50
-              }%) scale(0.02)`,
+              transform: `translate(${-homogenizedResultp.x * 50}%, ${homogenizedResultp.y * 50}%) scale(0.02)`,
             }}
           />
           <div
             className="target blue"
             style={{
-              transform: `translate(${-50}%, ${-lpPoints.x * 50 || 0}%) scale(0.02)`,
+              transform: `translate(${50}%, ${lpPoints.x * 50 || 0}%) scale(0.02)`,
             }}
           />
           <div
             className="target blue"
             style={{
-              transform: `translate(${50}%, ${-lpPoints.z * 50 || 0}%) scale(0.02)`,
+              transform: `translate(${-50}%, ${lpPoints.z * 50 || 0}%) scale(0.02)`,
             }}
           />
         </div>
@@ -160,29 +148,29 @@ function App() {
           </div>
 
           <div className="matrix-equation">
-            <Matrix4Display label={'intrinsic matrix, K'} matrix={K} />
+            <Matrix33Display label={'intrinsic matrix, K'} matrix={K} />
             <span>{'*'}</span>
-            <Matrix4Display label={'extrinsic matrix, M'} matrix={M} />
+            <Matrix34Display label={'extrinsic matrix, M'} matrix={M} />
             <span>{'*'}</span>
             <Vector4Display label={'world coord, X'} vector={X} />
             <span>{'='}</span>
-            <Vector4Display label={'result'} vector={result} />
+            <Vector3Display label={'result'} vector={result} />
             <span>{'='}</span>
             <span className="limit-dp">{limitDpHelper(result.z)}</span>
-            <Vector4Display label={'image coord, x'} vector={homogenizedResult} className="blue" />
+            <Vector3Display label={'image coord, x'} vector={homogenizedResult} className="blue" />
           </div>
 
           <div className="matrix-equation">
-            <Matrix4Display label={"intrinsic matrix, K'"} matrix={Kp} />
+            <Matrix33Display label={"intrinsic matrix, K'"} matrix={Kp} />
             <span>{'*'}</span>
-            <Matrix4Display label={"extrinsic matrix, M'"} matrix={Mp} />
+            <Matrix34Display label={"extrinsic matrix, M'"} matrix={Mp} />
             <span>{'*'}</span>
             <Vector4Display label={'world coord, X'} vector={X} />
             <span>{'='}</span>
-            <Vector4Display label={'result'} vector={resultp} />
+            <Vector3Display label={'result'} vector={resultp} />
             <span>{'='}</span>
             <span className="limit-dp">{limitDpHelper(resultp.z)}</span>
-            <Vector4Display label={"image coord, x'"} vector={homogenizedResultp} className="green" />
+            <Vector3Display label={"image coord, x'"} vector={homogenizedResultp} className="green" />
           </div>
 
           <div className="text">
@@ -204,11 +192,11 @@ function App() {
           </div>
 
           <div className="matrix-equation">
-            <Matrix4Display label={"M'"} matrix={Mp} />
+            <Matrix44Display label={"M'"} matrix={Mp} />
             <span>{'*'}</span>
-            <Matrix4Display label={'M\u207B\u00B9'} matrix={M_inv} />
+            <Matrix44Display label={'M\u207B\u00B9'} matrix={M_inv} />
             <span>{'='}</span>
-            <Matrix4Display label={'camera 1 space to camera 2 space'} matrix={cam1ToCam2} />
+            <Matrix44Display label={'camera 1 space to camera 2 space'} matrix={cam1ToCam2} />
           </div>
 
           <div className="text">
@@ -220,16 +208,16 @@ function App() {
 
           <div className="matrix-equation">
             <span>{' break '}</span>
-            <Matrix4Display label={'camera 1 space to camera 2 space'} matrix={cam1ToCam2} />
+            <Matrix44Display label={'camera 1 space to camera 2 space'} matrix={cam1ToCam2} />
             <span>{' into '}</span>
-            <Matrix3Display label={'left side, defined as R\u1D40'} matrix={R} />
+            <Matrix33Display label={'left side, defined as R\u1D40'} matrix={R} />
             <span>{' and '}</span>
             <Vector3Display label={'right side, defined as -(R\u1D40 * T)'} vector={minusRtT} />
           </div>
 
           <div className="matrix-equation">
             <span>{'From R\u1D40 and -(R\u1D40 * T), we can then get '}</span>
-            <Matrix3Display label={'R'} matrix={R} />
+            <Matrix33Display label={'R'} matrix={R} />
             <span>{' and '}</span>
             <Vector3Display label={'T'} vector={T} />
           </div>
@@ -297,15 +285,15 @@ function App() {
             <span>{'First, convert T into its cross-product matrix form: '}</span>
             <Vector3Display label={'T'} vector={T} />
             <span>{'=>'}</span>
-            <Matrix3Display label={'T_x'} matrix={T_x} />
+            <Matrix33Display label={'T_x'} matrix={T_x} />
           </div>
           <div className="matrix-equation">
             <span>{'Then multiply!: '}</span>
-            <Matrix3Display label={'T_x'} matrix={T_x} />
+            <Matrix33Display label={'T_x'} matrix={T_x} />
             <span>{'*'}</span>
-            <Matrix3Display label={'R'} matrix={R} />
+            <Matrix33Display label={'R'} matrix={R} />
             <span>{'='}</span>
-            <Matrix3Display label={'E'} matrix={E} />
+            <Matrix33Display label={'E'} matrix={E} />
           </div>
 
           <div className="text">
@@ -319,13 +307,13 @@ function App() {
           </div>
 
           <div className="matrix-equation">
-            <Matrix3Display label={'K\u207B\u1D40'} matrix={Kit} />
+            <Matrix33Display label={'K\u207B\u1D40'} matrix={Kit} />
             <span>{'*'}</span>
-            <Matrix3Display label={'E'} matrix={E} />
+            <Matrix33Display label={'E'} matrix={E} />
             <span>{'*'}</span>
-            <Matrix3Display label={"K'\u207B\u00B9"} matrix={Kpi} />
+            <Matrix33Display label={"K'\u207B\u00B9"} matrix={Kpi} />
             <span>{'='}</span>
-            <Matrix3Display label={'F'} matrix={F} />
+            <Matrix33Display label={'F'} matrix={F} />
           </div>
 
           <div className="text">
@@ -338,7 +326,7 @@ function App() {
           </div>
 
           <div className="matrix-equation">
-            <Matrix3Display label={'F'} matrix={F} />
+            <Matrix33Display label={'F'} matrix={F} />
             <span>{'*'}</span>
             <Vector3Display label={"x'"} vector={xp} className="green" />
             <span>{'='}</span>
@@ -346,7 +334,7 @@ function App() {
           </div>
 
           <div className="matrix-equation">
-            <Matrix3Display label={'F\u1D40'} matrix={Ft} />
+            <Matrix33Display label={'F\u1D40'} matrix={Ft} />
             <span>{'*'}</span>
             <Vector3Display label={'x'} vector={x} className="blue" />
             <span>{'='}</span>
