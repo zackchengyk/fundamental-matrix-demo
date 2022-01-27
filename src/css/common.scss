@@ -35,16 +35,21 @@ $background-color: $dark;
 $gap: 20px;
 
 $monospace: 'Inconsolata', monospace;
+
 $text-font-size: 1rem;
 $text-font-weight: 350;
-$text-color: $light-dark-dark;
+$text-font-color: $light-dark-dark;
 $text-line-height: 1.4;
-
 $text-bold-font-weight: 575;
 $text-bold-color: $light-dark;
 
-$label-font-size: 0.875rem;
+$matrix-font-size: 0.75rem;
+$matrix-font-weight: 500;
+$matrix-font-color: $light-dark-dark;
+
+$label-font-size: 0.75rem;
 $label-font-weight: 500;
+$label-font-color: $light-dark-dark;
 
 $text-vert-spacing: $text-font-size * $text-line-height * 0.65;
 
@@ -59,7 +64,7 @@ $line-color: $mid-tone;
   font-family: $monospace;
   font-size: $text-font-size;
   font-weight: $text-font-weight;
-  color: $text-color;
+  color: $text-font-color;
   line-height: $text-line-height;
 
   text-align: center;
@@ -67,6 +72,8 @@ $line-color: $mid-tone;
 
 .text {
   max-width: 65ch !important;
+
+  font-size: $text-font-size;
 
   strong {
     font-weight: $text-bold-font-weight;

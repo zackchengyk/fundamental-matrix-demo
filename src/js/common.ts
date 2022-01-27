@@ -1,11 +1,16 @@
 import * as THREE from 'three'
 
-const c = 7
+const charWidth = 6
+const regex = /^(-?)0(\.)/
 
-// Helper to display a float with a fixed number (c) of characters (including ellipses)
+// Helper to display a float either as zero, or with up to charWidth number of characters (including ellipses)
+// - Rounds towards zero, due to use of string truncation
+// - If the number is larger than can be represented, it will be displayed with enough characters
+//   to show the first decimal place: e.g. -12345.678 --> -12345.6…
 export function limitDpHelper(n: number): string {
   if (Math.abs(n) < 0.0001) return '0'
-  const s: string = n.toString()
+  const s: string = n.toString().replace(regex, '$1$2')
+  const c = Math.max(s.indexOf('.') + 3, charWidth)
   return s.length > c ? s.slice(0, c - 1) + '\u2026' : s.slice(0, c)
 }
 
