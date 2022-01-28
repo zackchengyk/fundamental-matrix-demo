@@ -10,28 +10,9 @@ import { DemoType, main } from './stereoSetup/main'
 import Matrix33Display from './matrixDisplay/Matrix33Display'
 import Vector3Display from './matrixDisplay/Vector3Display'
 import Matrix34Display from './matrixDisplay/Matrix34Display'
-
-function Target({ x, y, className }: { x: number; y: number; className: string }) {
-  // Bottom left = [1,1]
-  // Top right = [-1,-1]
-  return (
-    <div
-      className={'target ' + className}
-      style={{
-        transform: `translate(${-x * 50}%, ${y * 50 || 0}%) scale(0.02)`,
-      }}
-    />
-  )
-}
+import DemoWindow from './DemoWindow'
 
 function App() {
-  // HTML References
-  const demoRef = useRef<DemoType>()
-  const container1Ref = useRef<any>()
-  const canvas1Ref = useRef<any>()
-  const container2Ref = useRef<any>()
-  const canvas2Ref = useRef<any>()
-
   // World
   const [X, setX] = useState<THREE.Vector4>(new THREE.Vector4())
 
@@ -73,49 +54,29 @@ function App() {
   const lp = x.clone().applyMatrix3(Ft)
   const lpFunction = (x: number): number => (-lp.z - lp.x * x) / lp.y
 
-  // On startup
   useEffect(() => {
-    demoRef.current = main(container1Ref.current, canvas1Ref.current, container2Ref.current, canvas2Ref.current)
-    function updateGUIFunction(d: DemoType) {
-      const newX = new THREE.Vector4(d.pointPosition.x, d.pointPosition.y, d.pointPosition.z, 1)
-      setX((prevX) => (newX.equals(prevX) ? prevX : newX))
-      // Camera 1
-      const newK = intrinsicHelper(d.cameraData[0].intrinsicMatrix)
-      const newM = d.cameraData[0].extrinsicMatrix
-      setK((prevK) => (newK.equals(prevK) ? prevK : newK))
-      setM((prevM) => (newM.equals(prevM) ? prevM : newM))
-      // Camera 2
-      const newKp = intrinsicHelper(d.cameraData[1].intrinsicMatrix)
-      const newMp = d.cameraData[1].extrinsicMatrix
-      setKp((prevKp) => (newKp.equals(prevKp) ? prevKp : newKp))
-      setMp((prevMp) => (newMp.equals(prevMp) ? prevMp : newMp))
-    }
-    updateGUIFunction(demoRef.current)
-    demoRef.current.updateGUIFunction = updateGUIFunction
-  }, [])
+    console.log('M')
+  }, [M])
 
   return (
     <div className="App">
-      <div id="container-container">
-        <div className="container" ref={container1Ref}>
-          <canvas className="canvas" ref={canvas1Ref} />
-          <Target x={x.x} y={x.y} className="blue" />
-          <Target x={-1} y={lFunction(-1)} className="green" />
-          <Target x={1} y={lFunction(1)} className="green" />
-        </div>
-        <div className="container" ref={container2Ref}>
-          <canvas className="canvas" ref={canvas2Ref} />
-          <Target x={xp.x} y={xp.y} className="green" />
-          <Target x={-1} y={lpFunction(-1)} className="blue" />
-          <Target x={1} y={lpFunction(1)} className="blue" />
-        </div>
-      </div>
+      <DemoWindow
+        x={x}
+        xp={xp}
+        lFunction={lFunction}
+        lpFunction={lpFunction}
+        setX={setX}
+        setK={setK}
+        setM={setM}
+        setKp={setKp}
+        setMp={setMp}
+      />
 
       <div id="scroll-outer">
         <div id="scroll-inner">
           <div className="text">
             <p>
-              {'Welcome! Get comfy, because this page is all about how to mathematically go from '}
+              {'Welcome! This page is all about the math of going from '}
               <strong>{'camera matrices'}</strong>
               {' to the '}
               <strong>{'fundamental matrix'}</strong>
@@ -123,16 +84,7 @@ function App() {
               <strong>{'epipolar lines'}</strong>
               {'.'}
             </p>
-            <p>
-              {"Let's get started with some simple camera projection, based on the cameras and objects "}
-              {'in the scene simulated above.'}
-            </p>
-            <p>
-              {'By the way, any time you see a '}
-              <strong style={{ color: '#5bb585' }}>{'colored '}</strong>
-              <strong style={{ color: '#0082e7' }}>{'circle '}</strong>
-              {"up there, that's actually our prediction (using CSS), not a part of the simulation!"}
-            </p>
+            <p>{"Let's get started with some simple camera projection:"}</p>
           </div>
 
           <div className="matrix-equation">
