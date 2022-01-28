@@ -25,29 +25,29 @@ function Target({ x, y, className }: { x: number; y: number; className: string }
 }
 
 function App() {
-  // References
+  // HTML References
   const demoRef = useRef<DemoType>()
   const container1Ref = useRef<any>()
   const canvas1Ref = useRef<any>()
   const container2Ref = useRef<any>()
   const canvas2Ref = useRef<any>()
 
-  // States, camera 1
+  // World
   const [X, setX] = useState<THREE.Vector4>(new THREE.Vector4())
+
+  // Camera 1
   const [K, setK] = useState<THREE.Matrix3>(new THREE.Matrix3())
   const [M, setM] = useState<THREE.Matrix4>(new THREE.Matrix4())
   const MX = X.clone().applyMatrix4(M)
   const result = new THREE.Vector3(MX.x, MX.y, MX.z).applyMatrix3(K)
-  const homogenizedResult = result.clone().divideScalar(result.z)
-  const x = new THREE.Vector3(homogenizedResult.x, homogenizedResult.y, homogenizedResult.z)
+  const x = result.clone().divideScalar(result.z).setZ(1)
 
-  // States, camera 2
+  // Camera 2
   const [Kp, setKp] = useState<THREE.Matrix3>(new THREE.Matrix3())
   const [Mp, setMp] = useState<THREE.Matrix4>(new THREE.Matrix4())
   const MpX = X.clone().applyMatrix4(Mp)
   const resultp = new THREE.Vector3(MpX.x, MpX.y, MpX.z).applyMatrix3(Kp)
-  const homogenizedResultp = resultp.clone().divideScalar(resultp.z)
-  const xp = new THREE.Vector3(homogenizedResultp.x, homogenizedResultp.y, homogenizedResultp.z)
+  const xp = resultp.clone().divideScalar(resultp.z).setZ(1)
 
   // Camera 1 to camera 2 coordinate transform
   const M_inv = M.clone().invert()
@@ -68,24 +68,29 @@ function App() {
   const Ft = F.clone().transpose()
 
   // Lines
-  const l = xp.applyMatrix3(F)
+  const l = xp.clone().applyMatrix3(F)
   const lFunction = (x: number): number => (-l.z - l.x * x) / l.y
-  const lp = x.applyMatrix3(Ft)
+  const lp = x.clone().applyMatrix3(Ft)
   const lpFunction = (x: number): number => (-lp.z - lp.x * x) / lp.y
 
+  // On startup
   useEffect(() => {
     demoRef.current = main(container1Ref.current, canvas1Ref.current, container2Ref.current, canvas2Ref.current)
-
     function updateGUIFunction(d: DemoType) {
-      setK(intrinsicHelper(d.cameraData[0].intrinsicMatrix))
-      setM(d.cameraData[0].extrinsicMatrix)
-      setKp(intrinsicHelper(d.cameraData[1].intrinsicMatrix))
-      setMp(d.cameraData[1].extrinsicMatrix)
-      setX(new THREE.Vector4(d.pointPosition.x, d.pointPosition.y, d.pointPosition.z, 1))
+      const newX = new THREE.Vector4(d.pointPosition.x, d.pointPosition.y, d.pointPosition.z, 1)
+      setX((prevX) => (newX.equals(prevX) ? prevX : newX))
+      // Camera 1
+      const newK = intrinsicHelper(d.cameraData[0].intrinsicMatrix)
+      const newM = d.cameraData[0].extrinsicMatrix
+      setK((prevK) => (newK.equals(prevK) ? prevK : newK))
+      setM((prevM) => (newM.equals(prevM) ? prevM : newM))
+      // Camera 2
+      const newKp = intrinsicHelper(d.cameraData[1].intrinsicMatrix)
+      const newMp = d.cameraData[1].extrinsicMatrix
+      setKp((prevKp) => (newKp.equals(prevKp) ? prevKp : newKp))
+      setMp((prevMp) => (newMp.equals(prevMp) ? prevMp : newMp))
     }
-
     updateGUIFunction(demoRef.current)
-
     demoRef.current.updateGUIFunction = updateGUIFunction
   }, [])
 
