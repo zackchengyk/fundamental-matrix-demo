@@ -1,6 +1,5 @@
 import React from 'react'
 import * as THREE from 'three'
-import { primitiveArrayEquals } from '../common'
 import MatrixHelper from './MatrixHelper'
 
 type Matrix44DisplayProps = {
