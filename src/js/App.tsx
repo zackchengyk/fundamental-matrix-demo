@@ -94,13 +94,13 @@ function App() {
       <div id="container-container">
         <div className="container" ref={container1Ref}>
           <canvas className="canvas" ref={canvas1Ref} />
-          <Target x={homogenizedResult.x} y={homogenizedResult.y} className="blue" />
+          <Target x={x.x} y={x.y} className="blue" />
           <Target x={-1} y={lFunction(-1)} className="green" />
           <Target x={1} y={lFunction(1)} className="green" />
         </div>
         <div className="container" ref={container2Ref}>
           <canvas className="canvas" ref={canvas2Ref} />
-          <Target x={homogenizedResultp.x} y={homogenizedResultp.y} className="green" />
+          <Target x={xp.x} y={xp.y} className="green" />
           <Target x={-1} y={lpFunction(-1)} className="blue" />
           <Target x={1} y={lpFunction(1)} className="blue" />
         </div>
@@ -140,7 +140,7 @@ function App() {
             <Vector3Display label={'result'} vector={result} />
             <span>{'='}</span>
             <span className="limit-dp">{limitDpHelper(result.z)}</span>
-            <Vector3Display label={'image coord, x'} vector={homogenizedResult} className="blue" />
+            <Vector3Display label={'image coord, x'} vector={x} className="blue" />
           </div>
 
           <div className="matrix-equation">
@@ -153,7 +153,7 @@ function App() {
             <Vector3Display label={'result'} vector={resultp} />
             <span>{'='}</span>
             <span className="limit-dp">{limitDpHelper(resultp.z)}</span>
-            <Vector3Display label={"image coord, x'"} vector={homogenizedResultp} className="green" />
+            <Vector3Display label={"image coord, x'"} vector={xp} className="green" />
           </div>
 
           <div className="text">
