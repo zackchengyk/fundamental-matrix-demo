@@ -1,4 +1,6 @@
+import React from 'react'
 import * as THREE from 'three'
+import { primitiveArrayEquals } from '../common'
 import MatrixHelper from './MatrixHelper'
 
 type Matrix44DisplayProps = {
@@ -6,7 +8,7 @@ type Matrix44DisplayProps = {
   matrix: THREE.Matrix4
 }
 
-function Matrix44Display({ label, matrix }: Matrix44DisplayProps) {
+function Matrix44Display_({ label, matrix }: Matrix44DisplayProps) {
   return (
     <MatrixHelper
       label={label}
@@ -17,5 +19,11 @@ function Matrix44Display({ label, matrix }: Matrix44DisplayProps) {
     />
   )
 }
+
+function propsAreEqual(prev: Matrix44DisplayProps, next: Matrix44DisplayProps) {
+  return prev.label === next.label && prev.matrix.equals(next.matrix)
+}
+
+const Matrix44Display = React.memo(Matrix44Display_, propsAreEqual)
 
 export default Matrix44Display

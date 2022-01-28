@@ -24,3 +24,7 @@ export function intrinsicHelper(input: THREE.Matrix4): THREE.Matrix3 {
   const i = input.elements
   return new THREE.Matrix3().fromArray([i[0], i[1], i[2], i[4], i[5], i[6], i[8], i[9], -i[10], 0, 0, 0])
 }
+
+export function primitiveArrayEquals(a: (number | string)[], b: (number | string)[]) {
+  return a.length === b.length && a.every((val, index) => val === b[index])
+}

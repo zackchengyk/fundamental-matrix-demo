@@ -1,4 +1,6 @@
+import React from 'react'
 import * as THREE from 'three'
+import { primitiveArrayEquals } from '../common'
 import MatrixHelper from './MatrixHelper'
 
 type Vector3DisplayProps = {
@@ -7,7 +9,7 @@ type Vector3DisplayProps = {
   className?: string
 }
 
-function Vector3Display({ label, vector, className }: Vector3DisplayProps) {
+function Vector3Display_({ label, vector, className }: Vector3DisplayProps) {
   const a = vector.toArray()
   const array = a.length === 4 ? [a[0], a[1], a[2]] : a
   return (
@@ -21,5 +23,11 @@ function Vector3Display({ label, vector, className }: Vector3DisplayProps) {
     />
   )
 }
+
+function propsAreEqual(prev: Vector3DisplayProps, next: Vector3DisplayProps) {
+  return prev.label === next.label && primitiveArrayEquals(prev.vector.toArray(), next.vector.toArray())
+}
+
+const Vector3Display = React.memo(Vector3Display_, propsAreEqual)
 
 export default Vector3Display

@@ -1,3 +1,4 @@
+import React from 'react'
 import * as THREE from 'three'
 import MatrixHelper from './MatrixHelper'
 
@@ -6,7 +7,7 @@ type Matrix34DisplayProps = {
   matrix: THREE.Matrix4
 }
 
-function Matrix34Display({ label, matrix }: Matrix34DisplayProps) {
+function Matrix34Display_({ label, matrix }: Matrix34DisplayProps) {
   const a = matrix.elements
   const array = [a[0], a[1], a[2], a[4], a[5], a[6], a[8], a[9], a[10], a[12], a[13], a[14]]
   return (
@@ -19,5 +20,11 @@ function Matrix34Display({ label, matrix }: Matrix34DisplayProps) {
     />
   )
 }
+
+function propsAreEqual(prev: Matrix34DisplayProps, next: Matrix34DisplayProps) {
+  return prev.label === next.label && prev.matrix.equals(next.matrix)
+}
+
+const Matrix34Display = React.memo(Matrix34Display_, propsAreEqual)
 
 export default Matrix34Display
