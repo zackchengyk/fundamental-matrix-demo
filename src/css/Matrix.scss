@@ -2,8 +2,6 @@
 @use 'sass:math';
 @import './common.scss';
 
-$matrix-brace-border: 1px solid $line-color;
-
 .matrix-equation {
   background-color: color.mix($dark, $dark-dark, 50%);
   padding: $gap;
@@ -61,7 +59,7 @@ $matrix-brace-border: 1px solid $line-color;
   &::after {
     content: '';
     font-size: 0.5rem;
-    border: $matrix-brace-border;
+    border: $line;
   }
   &::before {
     border-right: none;

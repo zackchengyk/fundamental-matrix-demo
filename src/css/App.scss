@@ -25,11 +25,11 @@ body,
   grid-template-areas: 'a b';
   grid-template-columns: auto 3fr;
   place-items: stretch;
-  gap: math.div($gap, 2);
+  gap: $smaller-gap;
 }
 
 #scroll-outer {
-  background-color: $dark-dark;
+  background-color: $dark-light;
   place-self: stretch;
   overflow-x: hidden;
   overflow-y: scroll;

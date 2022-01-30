@@ -1,3 +1,5 @@
+@use 'sass:color';
+@use 'sass:math';
 @import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@300;325;350;375;400;425;450;475;500;525;550;575;600;625;650;675;700;725;750;775;800&display=swap');
 
 $white: #ffffff;
@@ -33,6 +35,7 @@ $green-black: #002e19;
 $background-color: $dark;
 
 $gap: 20px;
+$smaller-gap: math.div($gap, 2);
 
 $monospace: 'Inconsolata', monospace;
 
@@ -53,15 +56,19 @@ $label-font-color: $light-dark-dark;
 
 $text-vert-spacing: $text-font-size * $text-line-height * 0.65;
 
-$line-color: $mid-tone;
+$line: 1px solid $mid-tone;
 
 * {
+  -webkit-font-smoothing: subpixel-antialiased;
+
   box-sizing: border-box;
   -o-box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
 
   text-align: center;
+  margin: 0;
+  padding: 0;
 }
 
 body {
