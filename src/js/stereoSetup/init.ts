@@ -85,7 +85,7 @@ export function init(
     isPlaying: true,
     scene,
     pointPosition: mesh.position,
-    updateGUIFunction: (d) => {},
+    updateGUIFunction: (d: DemoType) => {},
     nextFrameReq: 0,
     prevTime: 0,
     cameraData,

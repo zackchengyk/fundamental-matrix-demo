@@ -4,7 +4,7 @@ import { animate } from './animate'
 import { init } from './init'
 
 export type DemoType = {
-  isPlaying: true
+  isPlaying: boolean
   scene: THREE.Scene
   pointPosition: THREE.Vector3
   updateGUIFunction: (d: DemoType) => void
@@ -39,7 +39,7 @@ export function main(
   ])
 
   // Start the animation loop
-  demo.nextFrameReq = requestAnimationFrame((t) => animate(t, demo))
+  demo.nextFrameReq = requestAnimationFrame((t) => animate(t, demo, true))
 
   // Return
   return demo

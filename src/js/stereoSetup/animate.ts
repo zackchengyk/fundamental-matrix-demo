@@ -7,17 +7,13 @@ stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
 document.body.appendChild(stats.dom)
 stats.dom.style.zIndex = '100000000000000'
 
-export function animate(time: DOMHighResTimeStamp, demo: DemoType) {
+export function animate(time: DOMHighResTimeStamp, demo: DemoType, forceRender?: boolean) {
   // Continue the animation loop
   demo.nextFrameReq = requestAnimationFrame((t) => animate(t, demo))
 
   stats.begin()
-  if (demo.isPlaying) {
-    // Todo: implement pausing
-    update(time, demo)
-    render(time, demo)
-    demo.updateGUIFunction(demo)
-  }
+  if (demo.isPlaying) update(time, demo)
+  if (demo.isPlaying || forceRender) render(time, demo)
   stats.end()
 }
 
@@ -28,7 +24,7 @@ function update(time: DOMHighResTimeStamp, demo: DemoType): void {
   demo.pointPosition.y = 2 + Math.sin(time * 0.0015) * 2
 }
 
-function render(time: DOMHighResTimeStamp, demo: DemoType): void {
+export function render(time: DOMHighResTimeStamp, demo: DemoType): void {
   // For each camera
   for (let i = 0; i < demo.cameraData.length; i++) {
     const data = demo.cameraData[i]
@@ -63,4 +59,7 @@ function render(time: DOMHighResTimeStamp, demo: DemoType): void {
     // Render
     renderer.render(demo.scene, data.camera)
   }
+
+  // Update GUI
+  demo.updateGUIFunction(demo)
 }
