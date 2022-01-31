@@ -3,7 +3,7 @@
 @import './common.scss';
 
 .matrix-equation {
-  background-color: color.mix($dark, $dark-dark, 50%);
+  background-color: $matrix-equation-color;
   padding: $gap;
 
   display: flex;
@@ -59,7 +59,7 @@
   &::after {
     content: '';
     font-size: 0.5rem;
-    border: $line;
+    border: $matrix-line;
   }
   &::before {
     border-right: none;
@@ -83,7 +83,7 @@
   display: grid;
   place-items: center;
   grid-auto-flow: column;
-  gap: 1ch 1ch;
+  gap: 0.5ch 0.75ch;
 }
 
 .limit-dp {

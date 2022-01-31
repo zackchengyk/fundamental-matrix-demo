@@ -2,20 +2,42 @@
 @use 'sass:math';
 @import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@300;325;350;375;400;425;450;475;500;525;550;575;600;625;650;675;700;725;750;775;800&display=swap');
 
+// ======================================================================== RESPONSIVE
+
+$smaller-b: 500;
+$larger-b: 900;
+$smaller-breakpoint: $smaller-b * 1px;
+$larger-breakpoint: $larger-b * 1px;
+
+@function _linear($x1, $y1, $x2, $y2) {
+  $gradient: math.div($y2 - $y1, $x2 - $x1);
+  $offset: $y2 - $x2 * $gradient;
+  @if $y1 < $y2 {
+    @return clamp($y1 * 1px, $gradient * 100vw + $offset * 1px, $y2 * 1px);
+  } @else {
+    @return clamp($y2 * 1px, $gradient * 100vw + $offset * 1px, $y1 * 1px);
+  }
+}
+@function linear($y1, $y2) {
+  @return _linear($smaller-b, $y1, $larger-b, $y2);
+}
+
+// ======================================================================== PRIMARY PALETTE
+
 $white: #ffffff;
 $light-light: #fff5f0;
-$light: #ffeee1;
-$light-dark: #f5ddca;
-$light-dark-dark: #e8ceb8;
+$light: #fae9dd;
+$light-dark: #eed9c8;
+$light-dark-dark: #d9c3b0;
 
 $mid-tone-light: #b5a191;
 $mid-tone: #84756c;
 $mid-tone-dark: #534b47;
 
-$dark-light-light: #231f1f;
-$dark-light: #1d1a1a;
-$dark: #1a1717;
-$dark-dark: #141212;
+$dark-light-light: #393433;
+$dark-light: #282424;
+$dark: #1c1919;
+$dark-dark: #151313;
 $black: #000000;
 
 $blue-white: #93dbff;
@@ -32,31 +54,52 @@ $green-dark: #005c2e;
 $green-dark-dark: #004826;
 $green-black: #002e19;
 
-$background-color: $dark;
+$background-color: $dark-dark;
+$panel-color: $dark;
+$matrix-equation-color: $dark-light;
+
+// ======================================================================== SPACING
 
 $gap: 20px;
-$smaller-gap: math.div($gap, 2);
+$smaller-gap: 15px;
+$scroll-container-inset: linear(20, 50) 20px;
 
-$monospace: 'Inconsolata', monospace;
+// ======================================================================== TEXT
 
-$text-font-size: 1rem;
-$text-font-weight: 350;
-$text-font-color: $light-dark-dark;
-$text-line-height: 1.4;
-$text-bold-font-weight: 575;
-$text-bold-color: $light-dark;
+$inconsolata: 'Inconsolata', monospace;
+
+$title-font-family: $inconsolata;
+$title-font-size: 1.25rem;
+$title-font-weight: 550;
+$title-font-color: $light-dark;
+$title-line-height: 1.1;
+
+$body-font-family: $inconsolata;
+$body-font-size: 1rem;
+$body-font-weight: 350;
+$body-font-color: $light-dark-dark;
+$body-line-height: 1.4;
+$body-bold-font-weight: 550;
+$body-bold-color: $light-dark;
+
+$blockquote-line-color: color.change($light-dark-dark, $alpha: 0.25);
+$blockquote-background-color: $matrix-equation-color;
 
 $matrix-font-size: 0.9375rem;
-$matrix-font-weight: 500;
-$matrix-font-color: $light-dark-dark;
+$matrix-font-weight: 350;
+$matrix-font-color: $light-dark;
 
 $label-font-size: 0.75rem;
-$label-font-weight: 600;
-$label-font-color: $light-dark-dark;
+$label-font-weight: 350;
+$label-font-color: $light-dark;
 
-$text-vert-spacing: $text-font-size * $text-line-height * 0.65;
+$text-vert-spacing: $body-font-size * $body-line-height * 0.65;
+
+// ======================================================================== SECTIONS
 
 $line: 1px solid $mid-tone;
+$panel-line: 1px solid $mid-tone-dark;
+$matrix-line: 1px solid $mid-tone-light;
 
 * {
   -webkit-font-smoothing: subpixel-antialiased;
@@ -66,30 +109,98 @@ $line: 1px solid $mid-tone;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
 
-  text-align: center;
   margin: 0;
   padding: 0;
 }
 
 body {
-  font-family: $monospace;
-  font-size: $text-font-size;
-  font-weight: $text-font-weight;
-  color: $text-font-color;
-  line-height: $text-line-height;
+  text-align: center;
+  font-family: $body-font-family;
+  font-size: $body-font-size;
+  font-weight: $body-font-weight;
+  color: $body-font-color;
+  line-height: $body-line-height;
 }
 
-.text {
-  max-width: 65ch !important;
+.title-text {
+  text-underline-offset: 0.25rem;
+  text-decoration: underline;
+  text-decoration-color: color.change($title-font-color, $alpha: 0.5);
 
-  font-size: $text-font-size;
+  width: 520px;
+  text-align: left;
 
-  strong {
-    font-weight: $text-bold-font-weight;
-    color: $text-bold-color;
+  font-family: $title-font-family;
+  font-size: $title-font-size;
+  font-weight: $title-font-weight;
+  color: $title-font-color;
+  line-height: $title-line-height;
+
+  &:not(:first-child) {
+    padding-top: $text-vert-spacing;
   }
 
-  > p:not(:last-child) {
+  margin-bottom: calc($text-vert-spacing - $gap);
+}
+
+.body-text {
+  width: 520px;
+  text-align: left;
+
+  font-family: $body-font-family;
+  font-size: $body-font-size;
+  font-weight: $body-font-weight;
+  color: $body-font-color;
+  line-height: $body-line-height;
+
+  strong {
+    font-weight: $body-bold-font-weight;
+    color: $body-bold-color;
+  }
+
+  > blockquote {
+    padding: 1ch 2ch;
+    border-left: 0.5ch solid $blockquote-line-color;
+
+    color: $matrix-font-color;
+    background-color: $blockquote-background-color;
+  }
+
+  > blockquote:not(:last-child),
+  p:not(:last-child) {
     margin-bottom: $text-vert-spacing;
+  }
+
+  .blue {
+    color: $blue-light !important;
+  }
+
+  .green {
+    color: $green-light !important;
+  }
+}
+
+.control-button {
+  border: $line;
+  padding: 0.5ch 1ch;
+
+  cursor: pointer;
+  background-color: transparent;
+
+  font-family: $body-font-family;
+  font-size: $body-font-size;
+  font-weight: $body-font-weight;
+  color: $body-font-color;
+  line-height: $body-line-height;
+
+  transform: scale(1);
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(1);
   }
 }

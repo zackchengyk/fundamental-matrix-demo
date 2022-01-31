@@ -7,9 +7,11 @@ const regex = /^(-?)0(\.)/
 // - Rounds towards zero, due to use of string truncation
 // - If the number is larger than can be represented, it will be displayed with enough characters
 //   to show the first decimal place: e.g. -12345.678 --> -12345.6…
-export function limitDpHelper(n: number): string {
+export function limitDpHelper(n: string | number): string {
+  if (typeof n === 'string') return n
   if (Math.abs(n) < 0.0001) return '0'
-  const s: string = n.toString().replace(regex, '$1$2')
+  const roundedN = Math.round(n * 1000) / 1000
+  const s: string = roundedN.toString().replace(regex, '$1$2')
   const c = Math.max(s.indexOf('.') + 3, charWidth)
   return s.length > c ? s.slice(0, c - 1) + '\u2026' : s.slice(0, c)
 }

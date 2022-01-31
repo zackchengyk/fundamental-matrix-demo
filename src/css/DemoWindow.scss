@@ -4,29 +4,39 @@
 
 #demo-window {
   display: grid;
-  grid-template: repeat(3, 1fr) / minmax(0, 1fr);
+  grid-template: 2fr 2fr 1fr / minmax(0, 1fr);
   height: 100%;
   max-height: 100%;
-  width: min(400px, 40vw);
+  width: min(450px, 30vw);
   place-items: stretch;
-  gap: math.div($gap, 2);
-}
+  gap: $smaller-gap;
 
-.camera-window {
-  position: relative;
-  overflow: hidden;
-  background-color: $black;
+  > div {
+    position: relative;
+    overflow: hidden;
+    background-color: $panel-color;
+    border: $panel-line;
+
+    > div {
+      position: absolute;
+      inset: 0;
+    }
+  }
 }
 
 .container {
-  position: absolute;
-  inset: 0;
+  transition: opacity 0.5s ease-out;
+  background-color: $dark-dark;
 }
 
 .canvas {
   height: 100%;
   width: 100%;
-  background-color: $dark-dark;
+
+  cursor: grab;
+  &:active {
+    cursor: grabbing;
+  }
 }
 
 .target {
@@ -64,9 +74,12 @@
   left: 0;
   background-color: $dark-dark;
   padding: 0.5ch 1ch;
+}
 
-  font-family: $monospace;
-  font-size: $text-font-size;
-  font-weight: $text-font-weight;
-  color: $text-font-color;
+#demo-controls-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: $smaller-gap;
 }

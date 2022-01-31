@@ -4,7 +4,7 @@
 
 body,
 #root {
-  background-color: $dark;
+  background-color: $background-color;
 
   height: 100vh;
   width: 100vw;
@@ -29,21 +29,29 @@ body,
 }
 
 #scroll-outer {
-  background-color: $dark-light;
+  border: $panel-line;
+  background-color: $panel-color;
   place-self: stretch;
-  overflow-x: hidden;
-  overflow-y: scroll;
 
-  > #scroll-inner {
-    padding: $gap;
+  position: relative;
 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: $gap;
+  > div {
+    position: absolute;
+    inset: 0;
+    overflow-x: hidden;
+    overflow-y: scroll;
+  }
+}
 
-    > * {
-      max-width: 100%;
-    }
+#scroll-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $gap;
+
+  padding: $scroll-container-inset;
+
+  > * {
+    max-width: 100%;
   }
 }

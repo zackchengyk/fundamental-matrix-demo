@@ -3,8 +3,21 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { animate } from './animate'
 import { init } from './init'
 
+type OnOff = {
+  on: () => void
+  off: () => void
+}
+
 export type DemoType = {
   isPlaying: boolean
+  modifierFunctions: {
+    autoplay: OnOff
+    frustums: OnOff
+    epipolarLines: OnOff
+    setC1RotationToIdentity: () => void
+    setC1ToLookAtOrigin: () => void
+    alignC1Axis: (a: 0 | 1 | 2 | null) => void
+  }
   scene: THREE.Scene
   pointPosition: THREE.Vector3
   updateGUIFunction: (d: DemoType) => void
@@ -17,6 +30,7 @@ export type DemoType = {
 
 export type DemoCameraDataType = {
   camera: THREE.PerspectiveCamera
+  cameraHelper: THREE.CameraHelper
   line: THREE.Line
   renderer: THREE.Renderer
   container: HTMLElement
