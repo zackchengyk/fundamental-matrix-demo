@@ -350,7 +350,7 @@ function App() {
                 <br />
                 {"3. Finally, the result's "}
                 <strong className="blue">{'x and y values'}</strong>
-                {" give the point's normalized* coordinates on the image plane."}
+                {" give the point's normalized 2D image coordinates."}
               </p>
               <p>
                 {"Now that we've calculated where the point should be, let's see if our prediction is correct. "}
@@ -524,7 +524,7 @@ function App() {
                 </button>
               </p>
               <p>
-                {"(You don't have to know this for CV, but a camera's "}
+                {"(You don't have to know this for CSCI 1430, but a camera's "}
                 <strong>{'frustum'}</strong>
                 {' is the shape which contains the region of space the camera can see)'}
               </p>
@@ -538,9 +538,9 @@ function App() {
               <blockquote>
                 <p>
                   {'Think:  '}
-                  {"we've seen that can map a 3D world coordinate to a 2D point on either camera; "}
-                  {'but is it possible to map a 2D point on one camera to a 2D point on another? '}
-                  {'Why or why not? '}
+                  {"we've seen that can map a 3D world point to a 2D image point on a camera's image "}
+                  {'plane; but is it possible to map a 2D image point on one camera to a 2D image point '}
+                  {'on another? Why or why not? '}
                 </p>
                 <p>
                   {'Hint:  '}
@@ -672,21 +672,21 @@ function App() {
 
             <div className="body-text">
               <p>
-                {'This was all you need to know about coordinate spaces for CV. '}
+                {'This was all you need to know about coordinate spaces for CSCI 1430. '}
                 {"We're now ready to talk about "}
-                <strong>{'camera-to-camera transforms'}</strong>
+                <strong>{'camera-space to camera-space transforms'}</strong>
                 {'.'}
               </p>
             </div>
 
-            <h2 id="camera-to-camera-transforms" className="title-text">
-              {'Camera-to-Camera Transforms'}
+            <h2 id="camera-space-to-camera-space-transforms" className="title-text">
+              {'Camera-Space to Camera-Space Transforms'}
             </h2>
 
             <div className="body-text">
               <p>
-                {'As we just discussed, a world-space coordinate X can be mapped to a '}
-                {'camera-space coordinate by left-multiplying it by M:'}
+                {'As we just discussed, a 3D world-space coordinate X can be mapped to a '}
+                {'3D camera-space coordinate by left-multiplying it by M:'}
               </p>
             </div>
 

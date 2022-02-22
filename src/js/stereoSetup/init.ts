@@ -147,7 +147,7 @@ export function init(
         setTargetPosition(cameraData[cameraNumber], pos, lookDirUpdateMode)
       },
       setLookPosition(cameraNumber: number, pos: THREE.Vector3) {
-        setTargetLookPosition(cameraData[cameraNumber], pos)
+        setTargetLookPosition(cameraData[cameraNumber], pos, LookDirUpdateMode.slerpToLookAt)
       },
       resetTransforms(cameraNumber: number) {
         setTargetPosition(
@@ -162,7 +162,7 @@ export function init(
         const camera = data.camera
         const distance = data.orbitControls.getDistance()
         const pos = new THREE.Vector3(camera.position.x, camera.position.y, camera.position.z - distance)
-        setTargetLookPosition(data, pos)
+        setTargetLookPosition(data, pos, LookDirUpdateMode.slerpToLookAt)
       },
     },
     scene,

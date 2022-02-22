@@ -25,11 +25,16 @@ export function setTargetPosition(
   pos: THREE.Vector3,
   lookDirUpdateMode?: LookDirUpdateMode
 ) {
-  data.lookDirUpdateMode = lookDirUpdateMode == null ? LookDirUpdateMode.anything : lookDirUpdateMode
+  if (lookDirUpdateMode != null) data.lookDirUpdateMode = lookDirUpdateMode
   data.targetPosition.copy(pos)
 }
 
-export function setTargetLookPosition(data: DemoCameraDataType, pos: THREE.Vector3) {
+export function setTargetLookPosition(
+  data: DemoCameraDataType,
+  pos: THREE.Vector3,
+  lookDirUpdateMode?: LookDirUpdateMode
+) {
+  if (lookDirUpdateMode != null) data.lookDirUpdateMode = lookDirUpdateMode
   data.orbitControls.target.copy(pos)
   data.targetLookPosition.copy(pos)
 }
