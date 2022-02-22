@@ -3,6 +3,7 @@ import { quaternionEquals, vector3Equals } from '../common'
 import { DemoCameraDataType } from './init'
 import { DemoType } from './main'
 
+const dummyVector = new THREE.Vector3()
 const dummyMatrix = new THREE.Matrix4()
 const dummyQuaternion = new THREE.Quaternion()
 
@@ -50,30 +51,38 @@ export function updateScene(time: DOMHighResTimeStamp, demo: DemoType): void {
     const line = data.line
     const orbitControls = data.orbitControls
     let isTranslating = false
+    let isFarOff = false
 
     // Update position of camera if necessary
     const targetPosition = data.targetPosition
-    if (!vector3Equals(camera.position, targetPosition, 0.0001)) {
+    dummyVector.subVectors(camera.position, targetPosition)
+    const norm = dummyVector.length()
+    if (norm > 0.0001) {
       isTranslating = true
-      const step = 10 * deltaTime // Approximate lerp-ing
+      isFarOff = norm > 0.1
+      const step = 15 * deltaTime // Approximate lerp-ing
       camera.position.lerp(targetPosition, step)
       camera.updateProjectionMatrix()
     }
 
     // Update angle of camera if necessary
-    if (isTranslating) {
-      // Known translation
+    if (isFarOff) {
+      // Translation still has a ways to go: match look position exactly
       camera.lookAt(data.targetLookPosition)
     } else {
-      // Possible translation or rotation
-      const matrix = new THREE.Matrix4().lookAt(camera.position, data.targetLookPosition, camera.up)
-      const quaternion = new THREE.Quaternion().setFromRotationMatrix(matrix)
-      if (!quaternionEquals(camera.quaternion, quaternion, 0.0001)) {
+      // Translation is close to complete: can afford to slerp
+      dummyMatrix.lookAt(camera.position, data.targetLookPosition, camera.up)
+      dummyQuaternion.setFromRotationMatrix(dummyMatrix)
+      if (!quaternionEquals(camera.quaternion, dummyQuaternion, 0.0001)) {
+        // Must rotate
         const step = 5 * deltaTime // Approximate slerp-ing
-        camera.quaternion.slerp(quaternion, step)
+        camera.quaternion.slerp(dummyQuaternion, step)
         camera.updateProjectionMatrix()
-      } else {
+      } else if (!isTranslating) {
+        // Translation IS complete
         orbitControls.update()
+      } else {
+        // Translation is not complete, and rotation is not needed
       }
     }
 
