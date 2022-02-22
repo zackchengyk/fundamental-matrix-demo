@@ -11,7 +11,7 @@ function Target({ x, y, className }: { x: number; y: number; className: string }
     <div
       className={'target ' + className}
       style={{
-        transform: `translate(${-x * 50}%, ${y * 50 || 0}%) scale(0.02)`,
+        transform: `translate(${-x * 50}%, ${y * 50}%) scale(0.04)`,
       }}
     />
   )
