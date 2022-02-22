@@ -10,7 +10,7 @@ export enum LookDirUpdateMode {
   slerpToLookAt,
 }
 
-const speed = 12
+const factor = 1 / 8
 const dummyVector = new THREE.Vector3()
 const dummyMatrix = new THREE.Matrix4()
 const dummyQuaternion = new THREE.Quaternion()
@@ -77,7 +77,7 @@ export function updateScene(time: DOMHighResTimeStamp, demo: DemoType): void {
     const norm = dummyVector.length()
     if (norm > 0.0001) {
       isTranslating = true
-      const step = speed * deltaTime // Approximate lerp-ing
+      const step = 1 - Math.pow(factor, deltaTime) // Approximate lerp-ing
       camera.position.lerp(targetPosition, step)
       camera.updateProjectionMatrix()
       if (
@@ -110,7 +110,7 @@ export function updateScene(time: DOMHighResTimeStamp, demo: DemoType): void {
         dummyQuaternion.setFromRotationMatrix(dummyMatrix)
         if (!quaternionEquals(camera.quaternion, dummyQuaternion, 0.0001)) {
           isRotating = true
-          const step = speed * deltaTime // Approximate slerp-ing
+          const step = 1 - Math.pow(factor, deltaTime)
           data.orbitControls.target.copy(dummyVector)
           camera.quaternion.slerp(dummyQuaternion, step)
           camera.updateProjectionMatrix()
