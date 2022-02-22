@@ -399,8 +399,7 @@ function App() {
                 </p>
                 <p>
                   {'Hint 2:  '}
-                  {'have you ever been told that the images on your retinas (in your eyes) are "inverted"? '}
-                  {'Remember when you had to "invert" kernels for convolution? '}
+                  {'have you ever been told that the images on your retinas (in your eyes) are "inverted"?'}
                 </p>
               </blockquote>
             </div>
@@ -885,10 +884,7 @@ function App() {
                 <strong>{'Whew!'}</strong>
                 {' That was a lot to get through!'}
               </p>
-              <p>
-                {"Don't worry, it took me >20h to figure this out, "}
-                {"and you don't have to totally understand this for HW3."}
-              </p>
+              <p>{"Don't worry, it took me >20h to figure this out."}</p>
               <p>
                 {'But now, '}
                 <strong>{'given R and T'}</strong>
