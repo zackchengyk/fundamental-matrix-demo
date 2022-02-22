@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import * as THREE from 'three'
-import { CameraCommand, intrinsicHelper } from './common'
+import { CameraCommand, intrinsicHelper, SceneCommand } from './common'
 import { DemoType, main } from './stereoSetup/main'
 import { OtherThingsToShow } from './App'
 import '../css/DemoWindow.scss'
@@ -72,6 +72,8 @@ type DemoWindowProps = {
   showC3Display: boolean
   otherThingsToShow: OtherThingsToShow
   // Control function triggers
+  sceneCommand: SceneCommand
+  setSceneCommand: React.Dispatch<React.SetStateAction<SceneCommand>>
   c1Command: CameraCommand
   setC1Command: React.Dispatch<React.SetStateAction<CameraCommand>>
   c2Command: CameraCommand
@@ -101,6 +103,8 @@ function DemoWindow({
   showC3Display,
   otherThingsToShow,
   // Control function triggers
+  sceneCommand,
+  setSceneCommand,
   c1Command,
   setC1Command,
   c2Command,
@@ -114,6 +118,17 @@ function DemoWindow({
   const canvas2Ref = useRef<any>()
   const container3Ref = useRef<any>()
   const canvas3Ref = useRef<any>()
+
+  // Scene
+  useEffect(() => {
+    if (sceneCommand === SceneCommand.nothing || demoRef.current == null) return
+    switch (sceneCommand) {
+      case SceneCommand.setPointToOrigin: {
+        demoRef.current.modifierFunctions.setPointPosition(new THREE.Vector3())
+      }
+    }
+    setSceneCommand(SceneCommand.nothing)
+  }, [sceneCommand])
 
   // Camera 1
   useEffect(() => {

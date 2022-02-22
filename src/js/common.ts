@@ -1,5 +1,10 @@
 import * as THREE from 'three'
 
+export enum SceneCommand {
+  nothing,
+  setPointToOrigin,
+}
+
 export enum CameraCommand {
   nothing,
   setLookPositionToOrigin,

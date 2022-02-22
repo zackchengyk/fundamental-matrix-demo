@@ -5,7 +5,7 @@ import '../css/Matrix.scss'
 import * as THREE from 'three'
 import Matrix44Display from './matrixDisplay/Matrix44Display'
 import Vector4Display from './matrixDisplay/Vector4Display'
-import { CameraCommand, crossProductMatrixHelper, limitDpHelper } from './common'
+import { CameraCommand, crossProductMatrixHelper, limitDpHelper, SceneCommand } from './common'
 import Matrix33Display from './matrixDisplay/Matrix33Display'
 import Vector3Display from './matrixDisplay/Vector3Display'
 import Matrix34Display from './matrixDisplay/Matrix34Display'
@@ -120,6 +120,7 @@ function App() {
     epipolarLines: false,
     epipolarLinePredictions: false,
   })
+  const [sceneCommand, setSceneCommand] = useState<SceneCommand>(SceneCommand.nothing)
   const [c1Command, setC1Command] = useState<CameraCommand>(CameraCommand.nothing)
   const [c2Command, setC2Command] = useState<CameraCommand>(CameraCommand.nothing)
 
@@ -149,6 +150,8 @@ function App() {
           showC3Display,
           otherThingsToShow,
           // Control function triggers
+          sceneCommand,
+          setSceneCommand,
           c1Command,
           setC1Command,
           c2Command,
@@ -195,7 +198,7 @@ function App() {
 
             <div className="matrix-equation">
               <Matrix34Display label={'projection matrix'} matrix={proExample} />
-              <span>{'='}</span>
+              <span className="big">{'='}</span>
               <Matrix33Display label={'intrinsic matrix'} matrix={intExample} />
               <span>{'*'}</span>
               <Matrix34Display label={'extrinsic matrix'} matrix={extExample} />
@@ -220,13 +223,16 @@ function App() {
                 <em>{'extrinsic'}</em>
                 {' properties: its rotation and position in space.'}
               </p>
+            </div>
+
+            <div className="body-text">
               <blockquote>
                 <p>
                   {'Think:  '}
                   {"using only the extrinsic matrix, can you determine the camera's "}
                   {'position in world space? If yes, how?'}
-                  <br />
-                  <br />
+                </p>
+                <p>
                   {'Hint:  '}
                   {"it's not <tx, ty, tz>."}
                 </p>
@@ -262,9 +268,6 @@ function App() {
                 {'You can drag with one finger to rotate, drag with two fingers to pan, '}
                 {'scroll to zoom, or click any of these buttons:'}
               </p>
-            </div>
-
-            <div className="body-text">
               <p>
                 <button
                   className="control-button"
@@ -329,9 +332,9 @@ function App() {
               <Matrix34Display label={'extrinsic matrix, M'} matrix={M} />
               <span>{'*'}</span>
               <Vector4Display label={'world coord, X'} vector={X} />
-              <span>{'='}</span>
+              <span className="big">{'='}</span>
               <Vector3Display label={'result'} vector={result} />
-              <span>{'='}</span>
+              <span className="big">{'='}</span>
               <span className="limit-dp">{limitDpHelper(result.z)}</span>
               <Vector3Display label={'image coord, x'} vector={x} className="blue" />
             </div>
@@ -384,17 +387,19 @@ function App() {
               <blockquote>
                 <p>
                   {'Think:  '}
-                  {'why are x and y axes seemingly flipped / '}
-                  {'why is <1,\u00a01> at the bottom left?'}
-                  <br />
-                  <br />
+                  {'why are x and y axes flipped, resulting in <1,\u00a01> being at the bottom left?'}
+                </p>
+                <p>
                   {'Hint 1:  '}
-                  {'consider that, in our result, z is +1. '}
-                  {'What does this mean about where the image plane is relative to the camera center?'}
-                  <br />
-                  <br />
+                  {'in our '}
+                  <em>{'result'}</em>
+                  {', z is +1. If the camera looks in the \u2011z direction, '}
+                  {'where is the image plane relative to the camera center?'}
+                </p>
+                <p>
                   {'Hint 2:  '}
-                  {'have you ever been told that the images on your retinas (in your eyes) are "flipped"?'}
+                  {'have you ever been told that the images on your retinas (in your eyes) are "inverted"? '}
+                  {'Remember when you had to "invert" kernels for convolution? '}
                 </p>
               </blockquote>
             </div>
@@ -425,7 +430,9 @@ function App() {
             <div className="body-text">
               <p>
                 {'Just like we did with camera 1, we can project the point located at '}
-                <strong>{`<${limitDpHelper(X.x)}, ${limitDpHelper(X.y)}, ${limitDpHelper(X.z)}>`}</strong>
+                <strong>{`<${limitDpHelper(X.x)},\u00a0${limitDpHelper(X.y)},\u00a0${limitDpHelper(
+                  X.z
+                )}>`}</strong>
                 {" onto camera 2's image plane:"}
               </p>
             </div>
@@ -436,9 +443,9 @@ function App() {
               <Matrix34Display label={"extrinsic matrix, M'"} matrix={Mp} />
               <span>{'*'}</span>
               <Vector4Display label={'world coord, X'} vector={X} />
-              <span>{'='}</span>
+              <span className="big">{'='}</span>
               <Vector3Display label={'result'} vector={resultp} />
-              <span>{'='}</span>
+              <span className="big">{'='}</span>
               <span className="limit-dp">{limitDpHelper(resultp.z)}</span>
               <Vector3Display label={"image coord, x'"} vector={xp} className="green" />
             </div>
@@ -488,7 +495,7 @@ function App() {
               </p>
             </div>
 
-            <h2 id="introducing-camera-2" className="title-text">
+            <h2 id="stereo-camera-pair" className="title-text">
               {'Getting To Know Our Stereo Camera Pair'}
             </h2>
 
@@ -499,8 +506,9 @@ function App() {
                 {' camera. '}
               </p>
               <p>
-                {'This one\'s just for reference (we\'ll call it the "witness camera"). '}
-                {"We won't be using it in any calculations or anything."}
+                {"This one's just for reference (we'll call it the "}
+                <strong>{'witness'}</strong>
+                {"), so we won't be using it in any calculations or anything."}
               </p>
               <p>{"Let's use it to take a look at what our cameras can see:"}</p>
               <p>
@@ -522,35 +530,245 @@ function App() {
               </p>
             </div>
 
-            <h2 id="camera-to-camera-transforms" className="title-text">
-              {'Camera-to-Camera Transforms'}
+            <h2 id="camera-to-camera-transforms-prelude" className="title-text">
+              {'Camera-to-Camera Transforms (Prelude)'}
             </h2>
+
+            <div className="body-text">
+              <blockquote>
+                <p>
+                  {'Think:  '}
+                  {"we've seen that can map a 3D world coordinate to a 2D point on either camera; "}
+                  {'but is it possible to map a 2D point on one camera to a 2D point on another? '}
+                  {'Why or why not? '}
+                </p>
+                <p>
+                  {'Hint:  '}
+                  {'is a 3D-to-2D mapping reversible?'}
+                </p>
+              </blockquote>
+            </div>
 
             <div className="body-text">
               <p>
                 {'Since '}
                 <strong>{'epipolar geometry'}</strong>
                 {' is all about the relationship between two cameras,'}
-                {" let's begin by finding the "}
+                {' we typically begin by finding the '}
                 <strong>{'relative transformation'}</strong>
-                {" from camera 1's space to camera 2's space."}
+                {" from c1's space to c2's space."}
               </p>
               <p>
-                {"If we have a coordinate in camera 1's space, first we "}
-                <strong>{'left-multiply by M\u207B\u00B9'}</strong>
-                {' to get to world space. Then, we '}
-                <strong>{"left-multiply by M'"}</strong>
-                {" to get to camera 2's space. This can be combined as below:"}
+                <em>
+                  <strong>{'But wait:'}</strong>
+                </em>
+                {' what does a camera\'s "space" even mean, anyway? '}
+              </p>
+            </div>
+
+            <h2 id="camera-spaces" className="title-text">
+              {'Camera Spaces'}
+            </h2>
+
+            <div className="body-text">
+              <p>
+                {'Recall that '}
+                <a href="#projection-recap">{'when we talked about 2D image coordinates'}</a>
+                {', we used '}
+                <strong className="blue">{'x and y'}</strong>
+                {', and fixed z\u00a0=\u00a01, which just meant "it\'s on the image plane". '}
+                <em>{"But who's to say we can't have coordinates where z\u00a0≠\u00a01?"}</em>
+              </p>
+              <p>
+                {"Here's c1's projection equation again, but only its first step (M\u00a0*\u00a0X). "}
+                {'Here are also some controls for the point:'}
+              </p>
+              <p>
+                <button
+                  className="control-button"
+                  onClick={() => {
+                    setIsMoving(false)
+                    setSceneCommand(SceneCommand.setPointToOrigin)
+                  }}>
+                  {'Set Point To Origin'}
+                </button>{' '}
+                <button className="control-button" onClick={() => setIsMoving((prev) => !prev)}>
+                  {isMoving ? 'Stop Moving' : 'Start Moving'}
+                </button>
               </p>
             </div>
 
             <div className="matrix-equation">
+              <Matrix33Display label={'intrinsic matrix, K'} matrix={K} />
+              <span>{'*'}</span>
+              <Matrix34Display label={'extrinsic matrix, M'} matrix={M} className="blue last" />
+              <span>{'*'}</span>
+              <Vector4Display label={'world coord, X'} vector={X} />
+              <span className="big">{'='}</span>
+              <Matrix33Display label={'intrinsic matrix, K'} matrix={K} />
+              <span>{'*'}</span>
+              <Vector3Display label={'M * X'} vector={MX} className="blue all" />
+            </div>
+
+            <div className="body-text">
+              <blockquote>
+                <p>
+                  {'Think:  '}
+                  {'what does the right-most column of the extrinsic matrix (M) represent, '}
+                  {'in terms of the camera\'s "space"?'}
+                </p>
+                <p>
+                  {'Hint:  '}
+                  {'did you try setting the point to the '}
+                  <em>{'origin'}</em>
+                  {'?'}
+                </p>
+              </blockquote>
+            </div>
+
+            <div className="body-text">
+              <p>
+                {'For the first time, we\'re going to give you an answer to a "think" question: '}
+                {'the right-most column represents the '}
+                <strong>{'world-space origin'}</strong>
+                {' in '}
+                <strong>{'camera space'}</strong>
+                {'.'}
+              </p>
+              <p>
+                {"In fact, that's the whole point of the "}
+                <strong>{'extrinsic matrix'}</strong>
+                {'! It takes '}
+                <em>{'any'}</em>
+                {' point in world space and maps it to a corresponding point '}
+                <strong>{'in camera space'}</strong>
+                {'.'}
+              </p>
+            </div>
+
+            <div className="body-text">
+              <blockquote>
+                <p>
+                  {'By the way, since an extrinsic matrix is just a rotation and a translation, it is '}
+                  <em>
+                    <strong>{'invertible'}</strong>
+                  </em>
+                  {'.'}
+                </p>
+                <p>
+                  {"However, this doesn't mean that "}
+                  <em>
+                    <strong>{'projection'}</strong>
+                  </em>
+                  {' is invertible! Recall that you divide '}
+                  {'by z, and then toss that value away. That information is gone, so z could have been anything'}
+                </p>
+                <p>
+                  {'Think:  '}
+                  {'if you fix just 2 of 3 dimensions, what kind of shape do you get?'}
+                </p>
+              </blockquote>
+            </div>
+
+            <div className="body-text">
+              <p>
+                {'This was all you need to know about coordinate spaces for CV. '}
+                {"We're now ready to talk about "}
+                <strong>{'camera-to-camera transforms'}</strong>
+                {'.'}
+              </p>
+            </div>
+
+            <h2 id="camera-to-camera-transforms" className="title-text">
+              {'Camera-to-Camera Transforms'}
+            </h2>
+
+            <div className="body-text">
+              <p>
+                {'As we just discussed, a world-space coordinate X can be mapped to a '}
+                {'camera-space coordinate by left-multiplying it by M:'}
+              </p>
+            </div>
+
+            <div className="matrix-equation">
+              <Matrix34Display label={'extrinsic matrix, M'} matrix={M} className="blue last" />
+              <span>{'*'}</span>
+              <Vector4Display label={'world coord, X'} vector={X} />
+              <span className="big">{'='}</span>
+              <Vector3Display label={'camera 1 space coord'} vector={MX} className="blue all" />
+            </div>
+
+            <div className="body-text">
+              <p>
+                {'We want to re-arrange this to have X on the left-hand side. '}
+                {'To do this, we will pretend that M is a '}
+                <strong>{'square matrix'}</strong>
+                {' with [0,\u00a00,\u00a00,\u00a01] on the bottom row, so that we can take its '}
+                <em>
+                  <strong>{'inverse'}</strong>
+                </em>
+                {'.'}
+              </p>
+            </div>
+
+            <div className="matrix-equation">
+              <Matrix34Display label={'extrinsic matrix, M'} matrix={M} />
+              <span className="big">{'->'}</span>
+              <Matrix44Display label={'extrinsic matrix, M'} matrix={M} />
+              <span className="big">{'->'}</span>
+              <Matrix44Display label={'inverse of extrinsic matrix, M\u207B\u00B9'} matrix={M_inv} />
+            </div>
+
+            <div className="body-text">
+              <p>{'Now, we can rearrange the earlier equation:'}</p>
+            </div>
+
+            <div className="matrix-equation">
+              <Vector4Display label={'world coord, X'} vector={X} />
+              <span className="big">{'='}</span>
+              <Matrix44Display label={'inverse of extrinsic matrix, M\u207B\u00B9'} matrix={M_inv} />
+              <span>{'*'}</span>
+              <Vector3Display label={'camera 1 space coord'} vector={MX} className="blue all" />
+            </div>
+
+            <div className="body-text">
+              <p>
+                {'Then, if we wanted to get to '}
+                <strong>{"camera 2's"}</strong>
+                {' space, we could just left-multiply by '}
+                <strong>
+                  <em>{'its'}</em>
+                  {" extrinsic matrix, M'"}
+                </strong>
+                {". Note that we have to do the same trick to make M' 4\u00a0x\u00a04:"}
+              </p>
+            </div>
+
+            <div className="matrix-equation">
+              <Vector4Display label={'camera 2 space coord'} vector={MpX} className="green all" />
+              <span className="big">{'='}</span>
               <Matrix44Display label={"M'"} matrix={Mp} />
               <span>{'*'}</span>
               <Matrix44Display label={'M\u207B\u00B9'} matrix={M_inv} />
-              <span>{'='}</span>
+              <span>{'*'}</span>
+              <Vector3Display label={'camera 1 space coord'} vector={MX} className="blue all" />
+            </div>
+
+            <div className="body-text">
+              <p>{"Finally, to make our lives easier, we can combine M' * M\u207B\u00B9 into a single matrix:"}</p>
+            </div>
+
+            <div className="matrix-equation">
+              <Matrix34Display label={"M'"} matrix={Mp} />
+              <span>{'*'}</span>
+              <Matrix34Display label={'M\u207B\u00B9'} matrix={M_inv} />
+              <span className="big">{'='}</span>
               <Matrix44Display label={'camera 1 space to camera 2 space'} matrix={cam1ToCam2} />
             </div>
+
+            <h2 id="relative-rotation-and-translation" className="title-text">
+              {'Relative Rotation And Translation'}
+            </h2>
 
             <div className="body-text">
               <p>
@@ -613,15 +831,16 @@ function App() {
               </p>
             </div>
 
-            <div className="matrix-equation">
+            {/* <div className="matrix-equation">
               <span style={{ top: 0 }}>{'(ಥ﹏ಥ)'}</span>
-            </div>
+            </div> */}
 
             <div className="body-text">
               <p>
                 <strong>{'Whew!'}</strong>
                 {' That was a lot to get through!'}
-                <br />
+              </p>
+              <p>
                 {"Don't worry, it took me >20h to figure this out, "}
                 {"and you don't have to totally understand this for HW3."}
               </p>
@@ -645,7 +864,7 @@ function App() {
               <Matrix33Display label={'T_x'} matrix={T_x} />
               <span>{'*'}</span>
               <Matrix33Display label={'R'} matrix={R} />
-              <span>{'='}</span>
+              <span className="big">{'='}</span>
               <Matrix33Display label={'E'} matrix={E} />
             </div>
 
@@ -665,7 +884,7 @@ function App() {
               <Matrix33Display label={'E'} matrix={E} />
               <span>{'*'}</span>
               <Matrix33Display label={"K'\u207B\u00B9"} matrix={Kpi} />
-              <span>{'='}</span>
+              <span className="big">{'='}</span>
               <Matrix33Display label={'F'} matrix={F} />
             </div>
 
@@ -682,7 +901,7 @@ function App() {
               <Matrix33Display label={'F'} matrix={F} />
               <span>{'*'}</span>
               <Vector3Display label={"x'"} vector={xp} className="green" />
-              <span>{'='}</span>
+              <span className="big">{'='}</span>
               <Vector3Display label={'l'} vector={l} className="green all" />
             </div>
 
@@ -690,7 +909,7 @@ function App() {
               <Matrix33Display label={'F\u1D40'} matrix={Ft} />
               <span>{'*'}</span>
               <Vector3Display label={'x'} vector={x} className="blue" />
-              <span>{'='}</span>
+              <span className="big">{'='}</span>
               <Vector3Display label={"l'"} vector={lp} className="blue all" />
             </div>
 
