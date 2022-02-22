@@ -59,7 +59,9 @@ export function init(
     // Set up camera helper (frustum)
     const cameraHelper = new THREE.CameraHelper(camera)
     cameraHelper.layers.enableAll()
-    cameraHelper.layers.disable(i)
+    // cameraHelper.layers.disable(i)
+    cameraHelper.visible = false
+    scene.add(cameraHelper)
 
     // Set up line of sight
     const material = new THREE.LineBasicMaterial({ color: i ? green : blue })
@@ -69,6 +71,8 @@ export function init(
     line.frustumCulled = false
     line.layers.enableAll()
     line.layers.disable(i)
+    line.visible = false
+    scene.add(line)
 
     // Set up renderer
     const renderer = new THREE.WebGLRenderer({ canvas, alpha: true })
@@ -124,8 +128,8 @@ export function init(
       enableMovement(bool: boolean) {
         demo.isMoving = bool
       },
-      showFrustums(bool: boolean) {
-        cameraData.forEach(({ cameraHelper }) => (cameraHelper.visible = bool))
+      showFrustum(cameraNumber: number, bool: boolean) {
+        cameraData[cameraNumber].cameraHelper.visible = bool
       },
       showEpipolarLines(bool: boolean) {
         cameraData.forEach(({ line }) => (line.visible = bool))

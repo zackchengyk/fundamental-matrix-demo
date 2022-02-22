@@ -18,7 +18,7 @@ export type DemoType = {
   isMoving: boolean
   modifierFunctions: {
     enableMovement: (bool: boolean) => void
-    showFrustums: (bool: boolean) => void
+    showFrustum: (cameraNumber: number, bool: boolean) => void
     showEpipolarLines: (bool: boolean) => void
     setPosition: (cameraNumber: number, pos: THREE.Vector3) => void
     setLookPosition: (cameraNumber: number, pos: THREE.Vector3) => void

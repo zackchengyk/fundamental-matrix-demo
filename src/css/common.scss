@@ -188,7 +188,9 @@ body {
   padding: 0.5ch 1ch;
 
   cursor: pointer;
-  background-color: transparent;
+  background-color: $panel-color;
+  box-shadow: 0 2px 4px color.change($black, $alpha: 0.7), 0 4px 8px color.change($black, $alpha: 0.5),
+    0 6px 16px color.change($black, $alpha: 0.3);
 
   font-family: $body-font-family;
   font-size: $body-font-size;

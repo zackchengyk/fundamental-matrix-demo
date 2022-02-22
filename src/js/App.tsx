@@ -53,7 +53,8 @@ const extExample = new THREE.Matrix4().fromArray([
 export type OtherThingsToShow = {
   c1PointPrediction: boolean
   c2PointPrediction: boolean
-  frustums: boolean
+  c1Frustum: boolean
+  c2Frustum: boolean
   epipolarLines: boolean
   epipolarLinePredictions: boolean
 }
@@ -120,7 +121,8 @@ function App() {
   const [otherThingsToShow, setOtherThingsToShow] = useState<OtherThingsToShow>({
     c1PointPrediction: false,
     c2PointPrediction: false,
-    frustums: false,
+    c1Frustum: false,
+    c2Frustum: false,
     epipolarLines: false,
     epipolarLinePredictions: false,
   })
@@ -488,6 +490,37 @@ function App() {
                 <button className="control-button" onClick={() => setC2Command(CameraCommand.useStandardViewZ)}>
                   {'Z Axis'}
                 </button>
+              </p>
+            </div>
+
+            <h2 id="introducing-camera-2" className="title-text">
+              {'Getting To Know Our Stereo Camera Pair'}
+            </h2>
+
+            <div className="body-text">
+              <p>{"Surprise! Here's yet another camera."}</p>
+              <p>{'[TODO: set up witness camera]'}</p>
+              <p>
+                {'This one\'s just for reference (we\'ll call it the "witness camera"). '}
+                {"We won't be using it in any calculations or anything."}
+              </p>
+              <p>{"Let's use it to take a look at what our cameras can see:"}</p>
+              <p>
+                <button
+                  className="control-button"
+                  onClick={() => setOtherThingsToShow((prev) => ({ ...prev, c1Frustum: !prev.c1Frustum }))}>
+                  {otherThingsToShow.c1Frustum ? "Hide Camera 1's Frustum" : "Show Camera 1's Frustum"}
+                </button>{' '}
+                <button
+                  className="control-button"
+                  onClick={() => setOtherThingsToShow((prev) => ({ ...prev, c2Frustum: !prev.c2Frustum }))}>
+                  {otherThingsToShow.c2Frustum ? "Hide Camera 2's Frustum" : "Show Camera 2's Frustum"}
+                </button>
+              </p>
+              <p>
+                {"(You don't have to know this for CV, but a camera's "}
+                <strong>{'frustum'}</strong>
+                {' is the shape which contains the region of space the camera can see)'}
               </p>
             </div>
 

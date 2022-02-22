@@ -134,8 +134,12 @@ function DemoWindow({
   // Frustums
   useEffect(() => {
     if (demoRef.current == null) return
-    demoRef.current.modifierFunctions.showFrustums(otherThingsToShow.frustums)
-  }, [otherThingsToShow.frustums])
+    demoRef.current.modifierFunctions.showFrustum(0, otherThingsToShow.c1Frustum)
+  }, [otherThingsToShow.c1Frustum])
+  useEffect(() => {
+    if (demoRef.current == null) return
+    demoRef.current.modifierFunctions.showFrustum(1, otherThingsToShow.c2Frustum)
+  }, [otherThingsToShow.c2Frustum])
 
   // Epipolar Lines
   useEffect(() => {
