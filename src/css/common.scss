@@ -1,6 +1,6 @@
 @use 'sass:color';
 @use 'sass:math';
-@import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@300;325;350;375;400;425;450;475;500;525;550;575;600;625;650;675;700;725;750;775;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@250;325;350;375;400;425;450;475;500;525;550;575;600;625;650;675;700;725;750;775;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 // ======================================================================== RESPONSIVE
@@ -90,6 +90,8 @@ $blockquote-background-color: $matrix-equation-color;
 
 $matrix-font-size: 0.9375rem;
 $matrix-font-weight: 325;
+$matrix-big-font-size: 1.875rem;
+$matrix-big-font-weight: 250;
 $matrix-font-color: $light-dark;
 
 $label-font-size: 0.75rem;
@@ -180,6 +182,17 @@ body {
 
   .green {
     color: $green-light !important;
+  }
+
+  a {
+    color: $body-font-color;
+    text-decoration-color: color.change($body-font-color, $alpha: 0.75);
+  }
+
+  strong a,
+  a strong {
+    color: $body-bold-font-color;
+    text-decoration-color: color.change($body-bold-font-color, $alpha: 0.75);
   }
 }
 
