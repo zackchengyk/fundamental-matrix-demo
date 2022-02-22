@@ -42,6 +42,9 @@ export function updateScene(time: DOMHighResTimeStamp, demo: DemoType): void {
   // Update position of point
   if (demo.isMoving) {
     pointPosition.y = 2 + Math.sin(time * 0.0015) * 2
+    demo.fixedPointPosition = null
+  } else if (demo.fixedPointPosition != null) {
+    pointPosition.copy(demo.fixedPointPosition)
   }
 
   // For each camera

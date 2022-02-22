@@ -128,6 +128,9 @@ export function init(
       enableMovement(bool: boolean) {
         demo.isMoving = bool
       },
+      setPointPosition(pos: THREE.Vector3 | null) {
+        if (pos != null) demo.fixedPointPosition = pos.clone()
+      },
       showFrustum(cameraNumber: number, bool: boolean) {
         cameraData[cameraNumber].cameraHelper.visible = bool
       },
@@ -157,6 +160,7 @@ export function init(
     },
     scene,
     pointPosition: mesh.position,
+    fixedPointPosition: null,
     updateGUIFunction: (d: DemoType) => {},
     nextFrameReq: 0,
     prevTime: 0,

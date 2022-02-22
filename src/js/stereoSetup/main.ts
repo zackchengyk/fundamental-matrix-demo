@@ -9,6 +9,7 @@ export type DemoType = {
   // Scene data
   scene: THREE.Scene
   pointPosition: THREE.Vector3
+  fixedPointPosition: THREE.Vector3 | null
   // Animation data
   nextFrameReq: number
   prevTime: DOMHighResTimeStamp
@@ -18,6 +19,7 @@ export type DemoType = {
   isMoving: boolean
   modifierFunctions: {
     enableMovement: (bool: boolean) => void
+    setPointPosition: (pos: THREE.Vector3 | null) => void
     showFrustum: (cameraNumber: number, bool: boolean) => void
     showEpipolarLines: (bool: boolean) => void
     setPosition: (cameraNumber: number, pos: THREE.Vector3) => void
