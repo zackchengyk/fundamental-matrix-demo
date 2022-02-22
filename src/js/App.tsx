@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import '../css/App.scss'
 import '../css/Matrix.scss'
 
 import * as THREE from 'three'
 import Matrix44Display from './matrixDisplay/Matrix44Display'
 import Vector4Display from './matrixDisplay/Vector4Display'
-import { crossProductMatrixHelper, intrinsicHelper, limitDpHelper } from './common'
+import { CameraCommand, crossProductMatrixHelper, limitDpHelper } from './common'
 import Matrix33Display from './matrixDisplay/Matrix33Display'
 import Vector3Display from './matrixDisplay/Vector3Display'
 import Matrix34Display from './matrixDisplay/Matrix34Display'
@@ -50,6 +50,14 @@ const extExample = new THREE.Matrix4().fromArray([
   0,
 ])
 
+export type OtherThingsToShow = {
+  c1PointPrediction: boolean
+  c2PointPrediction: boolean
+  frustums: boolean
+  epipolarLines: boolean
+  epipolarLinePredictions: boolean
+}
+
 function App() {
   // World
   const [X, setX] = useState<THREE.Vector4>(new THREE.Vector4())
@@ -57,6 +65,7 @@ function App() {
   // Camera 1
   const [K, setK] = useState<THREE.Matrix3>(new THREE.Matrix3())
   const [M, setM] = useState<THREE.Matrix4>(new THREE.Matrix4())
+  const [c1Pos, setC1Pos] = useState<THREE.Vector3>(new THREE.Vector3())
   const MX = X.clone().applyMatrix4(M)
   const result = new THREE.Vector3(MX.x, MX.y, MX.z).applyMatrix3(K)
   const x = result.clone().divideScalar(result.z)
@@ -64,6 +73,7 @@ function App() {
   // Camera 2
   const [Kp, setKp] = useState<THREE.Matrix3>(new THREE.Matrix3())
   const [Mp, setMp] = useState<THREE.Matrix4>(new THREE.Matrix4())
+  const [c2Pos, setC2Pos] = useState<THREE.Vector3>(new THREE.Vector3())
   const MpX = X.clone().applyMatrix4(Mp)
   const resultp = new THREE.Vector3(MpX.x, MpX.y, MpX.z).applyMatrix3(Kp)
   const xp = resultp.clone().divideScalar(resultp.z)
@@ -94,36 +104,58 @@ function App() {
 
   // States
   const scrollRef = useRef<any>()
-  const [c1EquationRef, showC1] = useScrollWatcher({ root: scrollRef.current, rootMargin: '0px', threshold: 1.0 })
-  const [c2EquationRef, showC2] = useScrollWatcher({ root: scrollRef.current, rootMargin: '0px', threshold: 1.0 })
-  const [c1LookAtOrigin, setC1LookAtOrigin] = useState<boolean>(true)
-  const [c1AlignAxis, setC1AlignAxis] = useState<0 | 1 | 2 | null>(null)
-  // const [c1ResetPosition, setC1ResetPosition] = useState<boolean>(false) // Resets on change
-  const [showC1Point, setShowC1Point] = useState<boolean>(false)
-  const [isPlaying, setIsPlaying] = useState<boolean>(false)
-  const [showC2Point, setShowC2Point] = useState<boolean>(false)
+  const [c1EquationRef, showC1Display] = useScrollWatcher({
+    root: scrollRef.current,
+    rootMargin: '0px',
+    threshold: 1.0,
+  })
+  const [c2EquationRef, showC2Display] = useScrollWatcher({
+    root: scrollRef.current,
+    rootMargin: '0px',
+    threshold: 1.0,
+  })
+
+  // Controls to interact with demo
+  const [isMoving, setIsMoving] = useState<boolean>(false)
+  const [otherThingsToShow, setOtherThingsToShow] = useState<OtherThingsToShow>({
+    c1PointPrediction: false,
+    c2PointPrediction: false,
+    frustums: false,
+    epipolarLines: false,
+    epipolarLinePredictions: false,
+  })
+  const [c1Command, setC1Command] = useState<CameraCommand>(CameraCommand.nothing)
+  const [c2Command, setC2Command] = useState<CameraCommand>(CameraCommand.nothing)
 
   return (
     <div className="App">
       <DemoWindow
         {...{
+          // Predictions
           x,
           xp,
           lFunction,
           lpFunction,
+          // Point
           setX,
+          isMoving,
+          // Camera 1
           setK,
           setM,
+          setC1Pos,
+          showC1Display,
+          // Camera 2
           setKp,
           setMp,
-          showC1,
-          showC2,
-          showC1Point,
-          showC2Point,
-          c1LookAtOrigin,
-          c1AlignAxis,
-          setC1AlignAxis,
-          isPlaying,
+          setC2Pos,
+          showC2Display,
+          // Stuff
+          otherThingsToShow,
+          // Control function triggers
+          c1Command,
+          setC1Command,
+          c2Command,
+          setC2Command,
         }}
       />
 
@@ -154,7 +186,7 @@ function App() {
 
             <div className="body-text">
               <p>
-                {'In lectures 7 & 8, you learned that a pinhole camera can be described by its '}
+                {'In previous lectures, you learned that a pinhole camera can be described by its '}
                 <strong>{'projection'}</strong>
                 {' matrix, which is the product of its '}
                 <strong>{'intrinsic'}</strong>
@@ -193,66 +225,83 @@ function App() {
               </p>
               <blockquote>
                 <p>
-                  {'Think: '}
-                  {"Using only the extrinsic matrix, can you determine the camera's "}
+                  {'Think:  '}
+                  {"using only the extrinsic matrix, can you determine the camera's "}
                   {'position in world space? If yes, how?'}
                   <br />
-                  {'Hint: '}
-                  {"it's NOT <tx, ty, tz>; we'll see why later."}
+                  <br />
+                  {'Hint:  '}
+                  {"it's not <tx, ty, tz>."}
                 </p>
               </blockquote>
             </div>
 
-            <h2 id="camera-1-demo" className="title-text">
-              {'Camera 1 Demo'}
+            <h2 id="introducing-camera-1" className="title-text">
+              {'Introducing: Camera 1'}
             </h2>
 
             <div className="body-text">
               <p>
-                {"It's time to look at an "}
+                {"Now, let's look at an "}
                 <strong>{'interactive example'}</strong>
-                {'! Move the camera, and see how its intrinsic and extrinsic matrices change.'}
-              </p>
-              <p>
-                {'Drag with one finger to rotate, drag with two fingers to pan, '}
-                {'scroll to zoom, or click any of these buttons:'}
-              </p>
-            </div>
-
-            <div className="body-text">
-              <p>
-                {'Adjust its rotation: '}
-                <button className="control-button" onClick={() => setC1LookAtOrigin((prev) => !prev)}>
-                  {c1LookAtOrigin ? 'Un-rotate Camera 1' : 'Point Camera 1 At Origin'}
-                </button>
-              </p>
-              <p>
-                {'Align the camera with the: '}
-                <button className="control-button" onClick={() => (setC1AlignAxis(0), setC1LookAtOrigin(true))}>
-                  {'X Axis'}
-                </button>{' '}
-                <button className="control-button" onClick={() => (setC1AlignAxis(1), setC1LookAtOrigin(true))}>
-                  {'Y Axis'}
-                </button>{' '}
-                <button className="control-button" onClick={() => (setC1AlignAxis(2), setC1LookAtOrigin(true))}>
-                  {'Z Axis'}
-                </button>
+                {". Here, we've set up a scene with an object and a camera (we'll call this "}
+                <strong>{'camera 1'}</strong>
+                {').'}
               </p>
             </div>
 
             <div className="matrix-equation" ref={c1EquationRef}>
               <span>{'Camera 1 has'}</span>
               <Matrix33Display label={'intrinsic matrix, K'} matrix={K} />
-              <span>{'and'}</span>
+              <span>{', '}</span>
               <Matrix34Display label={'extrinsic matrix, M'} matrix={M} />
+              <span>{', and'}</span>
+              <Vector3Display label={'position'} vector={c1Pos} />
+            </div>
+
+            <div className="body-text">
+              <p>
+                {'Move the camera, and see how its intrinsic and extrinsic matrices change. '}
+                {'You can drag with one finger to rotate, drag with two fingers to pan, '}
+                {'scroll to zoom, or click any of these buttons:'}
+              </p>
+            </div>
+
+            <div className="body-text">
+              <p>
+                <button
+                  className="control-button"
+                  onClick={() => setC1Command(CameraCommand.setRotationToIdentity)}>
+                  {'Set Rotation To Identity'}
+                </button>{' '}
+                <button
+                  className="control-button"
+                  onClick={() => setC1Command(CameraCommand.setLookPositionToOrigin)}>
+                  {'Look At Origin'}
+                </button>{' '}
+                <button className="control-button" onClick={() => setC1Command(CameraCommand.resetTransforms)}>
+                  {'Reset'}
+                </button>
+              </p>
+              <p>
+                {'Standard views: '}
+                <button className="control-button" onClick={() => setC1Command(CameraCommand.useStandardViewX)}>
+                  {'X Axis'}
+                </button>{' '}
+                <button className="control-button" onClick={() => setC1Command(CameraCommand.useStandardViewY)}>
+                  {'Y Axis'}
+                </button>{' '}
+                <button className="control-button" onClick={() => setC1Command(CameraCommand.useStandardViewZ)}>
+                  {'Z Axis'}
+                </button>
+              </p>
             </div>
 
             <div className="body-text">
               <blockquote>
                 <p>
-                  {'Hint: '}
-                  {'Notice how the right-most column of M changes when you adjust the rotation, '}
-                  {'but not the position, of the camera.'}
+                  {'Notice how the right-most column of M changes when you rotate the camera, '}
+                  {"even if you don't change its position."}
                 </p>
               </blockquote>
             </div>
@@ -263,16 +312,17 @@ function App() {
 
             <div className="body-text">
               <p>
-                {"If, by now, you've done HW3 written Q2, you'd have "}
-                <strong>{'projected '}</strong>
+                {"If you've done the written component of HW3, you'd already have "}
+                <strong>{'projected'}</strong>
                 {' points in world space onto an image plane. '}
+                {"If not, that's okay! We'll briefly recap the basic principles here :)"}
               </p>
               <p>
-                {"Now, let's use camera 1 to do the same for a point located at "}
+                {"Using camera 1 as an example, let's project the point located at "}
                 <strong>
                   {`<${limitDpHelper(X.x)},\u00a0${limitDpHelper(X.y)},\u00a0${limitDpHelper(X.z)}>`}
                 </strong>
-                {'.'}
+                {' onto our image plane.'}
               </p>
             </div>
 
@@ -293,27 +343,42 @@ function App() {
               <p>
                 {"This equation may seem scary, but it's lot simpler when you recall the steps for projection: "}
                 <br />
-                {'1. Multiply K * M * X to get a 3x1 result, then'}
+                {'1. Multiply K * M * X to get a 3x1 result'}
                 <br />
-                {'2. Divide that result by its z component'}
+                {'2. Then, divide that result by its z component'}
                 <br />
-                {'3. The '}
+                {"3. Finally, the result's "}
                 <strong className="blue">{'x and y values'}</strong>
-                {" give the point's normalized coordinates on the image plane."}
+                {" give the point's normalized* coordinates on the image plane."}
+              </p>
+              <p>
+                {"Now that we've calculated where the point should be, let's see if our prediction is correct. "}
+                {'Click the button below to show a '}
+                <strong className="blue">{'marker'}</strong>
+                {' on the image: '}
+              </p>
+              <p>
+                <button
+                  className="control-button"
+                  onClick={() =>
+                    setOtherThingsToShow((prev) => ({ ...prev, c1PointPrediction: !prev.c1PointPrediction }))
+                  }>
+                  {otherThingsToShow.c1PointPrediction
+                    ? "Hide Camera 1's Point Prediction"
+                    : "Show Camera 1's Point Prediction"}
+                </button>
               </p>
             </div>
 
             <div className="body-text">
               <p>
-                {"Let's put that math to use: "}
-                <button className="control-button" onClick={() => setShowC1Point((prev) => !prev)}>
-                  {showC1Point ? 'Hide Point Prediction' : 'Show Point Prediction'}
-                </button>
+                {'Try moving the camera around again! Or, click the button below to make the point '}
+                {isMoving ? 'stop moving' : 'start moving'}
+                {':'}
               </p>
               <p>
-                {'Stationary point too boring? '}
-                <button className="control-button" onClick={() => setIsPlaying((prev) => !prev)}>
-                  {isPlaying ? 'Stop Moving' : 'Start Moving'}
+                <button className="control-button" onClick={() => setIsMoving((prev) => !prev)}>
+                  {isMoving ? 'Stop Moving' : 'Start Moving'}
                 </button>
               </p>
             </div>
@@ -321,22 +386,54 @@ function App() {
             <div className="body-text">
               <blockquote>
                 <p>
-                  {'Think: '}
-                  {'why are x and y axes sorta flipped / '}
+                  {'Think:  '}
+                  {'why are x and y axes seemingly flipped / '}
                   {'why is <1,\u00a01> at the bottom left?'}
                   <br />
-                  {'Hint: '}
-                  {'consider that z is +1. '}
-                  {'What does this mean about where the image plane is, relative to the camera center?'}
+                  <br />
+                  {'Hint 1:  '}
+                  {'consider that, in our result, z is +1. '}
+                  {'What does this mean about where the image plane is relative to the camera center?'}
+                  <br />
+                  <br />
+                  {'Hint 2:  '}
+                  {'have you ever been told that the images on your retinas (in your eyes) are "flipped"?'}
                 </p>
               </blockquote>
             </div>
 
-            <h2 id="" className="title-text">
-              {'Stereo Cameras'}
+            <h2 id="introducing-camera-2" className="title-text">
+              {'Introducing: Camera 2'}
             </h2>
 
+            <div className="body-text">
+              <p>
+                {"Now that we're through the recaps, it's finally time to talk about "}
+                <strong>{'stereo camera pairs'}</strong>
+                {". For that, let's introduce "}
+                <strong>{'camera 2'}</strong>
+                {'!'}
+              </p>
+            </div>
+
             <div className="matrix-equation" ref={c2EquationRef}>
+              <span>{'Camera 2 has'}</span>
+              <Matrix33Display label={'intrinsic matrix, Kp'} matrix={Kp} />
+              <span>{', '}</span>
+              <Matrix34Display label={'extrinsic matrix, Mp'} matrix={Mp} />
+              <span>{', and'}</span>
+              <Vector3Display label={'position'} vector={c2Pos} />
+            </div>
+
+            <div className="body-text">
+              <p>
+                {'Just like we did with camera 1, we can project the point located at '}
+                <strong>{`<${limitDpHelper(X.x)}, ${limitDpHelper(X.y)}, ${limitDpHelper(X.z)}>`}</strong>
+                {" onto camera 2's image plane:"}
+              </p>
+            </div>
+
+            <div className="matrix-equation">
               <Matrix33Display label={"intrinsic matrix, K'"} matrix={Kp} />
               <span>{'*'}</span>
               <Matrix34Display label={"extrinsic matrix, M'"} matrix={Mp} />
@@ -348,6 +445,55 @@ function App() {
               <span className="limit-dp">{limitDpHelper(resultp.z)}</span>
               <Vector3Display label={"image coord, x'"} vector={xp} className="green" />
             </div>
+
+            <div className="body-text">
+              <p>
+                <button
+                  className="control-button"
+                  onClick={() =>
+                    setOtherThingsToShow((prev) => ({ ...prev, c2PointPrediction: !prev.c2PointPrediction }))
+                  }>
+                  {otherThingsToShow.c2PointPrediction
+                    ? "Hide Camera 2's Point Prediction"
+                    : "Show Camera 2's Point Prediction"}
+                </button>
+              </p>
+              <p>{'And, of course, we can also move camera 2 around:'}</p>
+            </div>
+
+            <div className="body-text">
+              <p>
+                <button
+                  className="control-button"
+                  onClick={() => setC2Command(CameraCommand.setRotationToIdentity)}>
+                  {'Set Rotation To Identity'}
+                </button>{' '}
+                <button
+                  className="control-button"
+                  onClick={() => setC2Command(CameraCommand.setLookPositionToOrigin)}>
+                  {'Look At Origin'}
+                </button>{' '}
+                <button className="control-button" onClick={() => setC2Command(CameraCommand.resetTransforms)}>
+                  {'Reset'}
+                </button>
+              </p>
+              <p>
+                {'Standard views: '}
+                <button className="control-button" onClick={() => setC2Command(CameraCommand.useStandardViewX)}>
+                  {'X Axis'}
+                </button>{' '}
+                <button className="control-button" onClick={() => setC2Command(CameraCommand.useStandardViewY)}>
+                  {'Y Axis'}
+                </button>{' '}
+                <button className="control-button" onClick={() => setC2Command(CameraCommand.useStandardViewZ)}>
+                  {'Z Axis'}
+                </button>
+              </p>
+            </div>
+
+            <h2 id="camera-to-camera-transforms" className="title-text">
+              {'Camera-to-Camera Transforms'}
+            </h2>
 
             <div className="body-text">
               <p>
@@ -400,8 +546,8 @@ function App() {
 
             <div className="body-text">
               <p>
-                <strong>{'Think:'}</strong>
-                {' What exactly do '}
+                {'Think:  '}
+                {'what exactly do '}
                 <strong>{'R'}</strong>
                 {' and '}
                 <strong>{'T'}</strong>

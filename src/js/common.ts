@@ -1,5 +1,15 @@
 import * as THREE from 'three'
 
+export enum CameraCommand {
+  nothing,
+  setLookPositionToOrigin,
+  setRotationToIdentity,
+  resetTransforms,
+  useStandardViewX,
+  useStandardViewY,
+  useStandardViewZ,
+}
+
 const charWidth = 5
 const regex = /^(-?)0(\.)/
 
@@ -27,6 +37,22 @@ export function intrinsicHelper(input: THREE.Matrix4): THREE.Matrix3 {
   return new THREE.Matrix3().fromArray([i[0], i[1], i[2], i[4], i[5], i[6], i[8], i[9], -i[10], 0, 0, 0])
 }
 
+// Helper to check if two arrays of numbers/strings are equal
 export function primitiveArrayEquals(a: (number | string)[], b: (number | string)[]) {
   return a.length === b.length && a.every((val, index) => val === b[index])
+}
+
+// Helper to check if two vector3s are equal to some precision
+export function vector3Equals(v1: THREE.Vector3, v2: THREE.Vector3, epsilon: number) {
+  return Math.abs(v1.x - v2.x) < epsilon && Math.abs(v1.y - v2.y) < epsilon && Math.abs(v1.z - v2.z) < epsilon
+}
+
+// Helper to check if two quaternions are equal to some precision
+export function quaternionEquals(v1: THREE.Quaternion, v2: THREE.Quaternion, epsilon: number) {
+  return (
+    Math.abs(v1.x - v2.x) < epsilon &&
+    Math.abs(v1.y - v2.y) < epsilon &&
+    Math.abs(v1.z - v2.z) < epsilon &&
+    Math.abs(v1.w - v2.w) < epsilon
+  )
 }

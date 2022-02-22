@@ -1,11 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 import * as THREE from 'three'
-import { intrinsicHelper } from './common'
+import { CameraCommand, intrinsicHelper } from './common'
 import { DemoType, main } from './stereoSetup/main'
+import { OtherThingsToShow } from './App'
 import '../css/DemoWindow.scss'
 
 function Target({ x, y, className }: { x: number; y: number; className: string }) {
-  // Bottom left = [1,1]; top right = [-1,-1]
+  // Note: bottom left = [1,1]; top right = [-1,-1]
   return (
     <div
       className={'target ' + className}
@@ -16,44 +17,92 @@ function Target({ x, y, className }: { x: number; y: number; className: string }
   )
 }
 
+function dispatchCameraCommand(demoRef: DemoType, cameraNumber: number, command: CameraCommand) {
+  switch (command) {
+    case CameraCommand.setLookPositionToOrigin: {
+      demoRef.modifierFunctions.setLookPosition(cameraNumber, new THREE.Vector3())
+      break
+    }
+    case CameraCommand.setRotationToIdentity: {
+      demoRef.modifierFunctions.setRotationToIdentity(cameraNumber)
+      break
+    }
+    case CameraCommand.resetTransforms: {
+      demoRef.modifierFunctions.resetSetup(cameraNumber)
+      break
+    }
+    case CameraCommand.useStandardViewX: {
+      demoRef.modifierFunctions.setPosition(cameraNumber, new THREE.Vector3(10, 0, 0))
+      demoRef.modifierFunctions.setLookPosition(cameraNumber, new THREE.Vector3())
+      break
+    }
+    case CameraCommand.useStandardViewY: {
+      demoRef.modifierFunctions.setPosition(cameraNumber, new THREE.Vector3(0, 10, 0))
+      demoRef.modifierFunctions.setLookPosition(cameraNumber, new THREE.Vector3())
+      break
+    }
+    case CameraCommand.useStandardViewZ: {
+      demoRef.modifierFunctions.setPosition(cameraNumber, new THREE.Vector3(0, 0, 10))
+      demoRef.modifierFunctions.setLookPosition(cameraNumber, new THREE.Vector3())
+      break
+    }
+  }
+}
+
 type DemoWindowProps = {
+  // Predictions
   x: THREE.Vector3
   xp: THREE.Vector3
   lFunction: (x: number) => number
   lpFunction: (xp: number) => number
+  // Point
   setX: React.Dispatch<React.SetStateAction<THREE.Vector4>>
+  isMoving: boolean
+  // Camera 1
   setK: React.Dispatch<React.SetStateAction<THREE.Matrix3>>
   setM: React.Dispatch<React.SetStateAction<THREE.Matrix4>>
+  setC1Pos: React.Dispatch<React.SetStateAction<THREE.Vector3>>
+  showC1Display: boolean
+  // Camera 2
   setKp: React.Dispatch<React.SetStateAction<THREE.Matrix3>>
   setMp: React.Dispatch<React.SetStateAction<THREE.Matrix4>>
-  showC1: boolean
-  showC2: boolean
-  showC1Point: boolean
-  showC2Point: boolean
-  c1LookAtOrigin: boolean
-  c1AlignAxis: 0 | 1 | 2 | null
-  setC1AlignAxis: React.Dispatch<React.SetStateAction<0 | 1 | 2 | null>>
-  isPlaying: boolean
+  setC2Pos: React.Dispatch<React.SetStateAction<THREE.Vector3>>
+  showC2Display: boolean
+  // Stuff
+  otherThingsToShow: OtherThingsToShow
+  // Control function triggers
+  c1Command: CameraCommand
+  setC1Command: React.Dispatch<React.SetStateAction<CameraCommand>>
+  c2Command: CameraCommand
+  setC2Command: React.Dispatch<React.SetStateAction<CameraCommand>>
 }
 
 function DemoWindow({
+  // Predictions
   x,
   xp,
   lFunction,
   lpFunction,
+  // Point
   setX,
+  isMoving,
+  // Camera 1
   setK,
   setM,
+  setC1Pos,
+  showC1Display,
+  // Camera 2
   setKp,
   setMp,
-  showC1,
-  showC2,
-  showC1Point,
-  showC2Point,
-  c1LookAtOrigin,
-  c1AlignAxis,
-  setC1AlignAxis,
-  isPlaying,
+  setC2Pos,
+  showC2Display,
+  // Stuff
+  otherThingsToShow,
+  // Control function triggers
+  c1Command,
+  setC1Command,
+  c2Command,
+  setC2Command,
 }: DemoWindowProps) {
   // Refs
   const demoRef = useRef<DemoType>()
@@ -62,45 +111,37 @@ function DemoWindow({
   const container2Ref = useRef<any>()
   const canvas2Ref = useRef<any>()
 
-  // C1
+  // Camera 1
   useEffect(() => {
-    c1LookAtOrigin
-      ? demoRef.current?.modifierFunctions.setC1ToLookAtOrigin()
-      : demoRef.current?.modifierFunctions.setC1RotationToIdentity()
-  }, [c1LookAtOrigin])
-  useEffect(() => {
-    demoRef.current?.modifierFunctions.alignC1Axis(c1AlignAxis)
-    setC1AlignAxis(null)
-  }, [c1AlignAxis])
+    if (c1Command === CameraCommand.nothing || demoRef.current == null) return
+    dispatchCameraCommand(demoRef.current, 0, c1Command)
+    setC1Command(CameraCommand.nothing)
+  }, [c1Command])
 
-  // Playing
+  // Camera 2
   useEffect(() => {
-    if (demoRef.current != null) {
-      const { on, off } = demoRef.current.modifierFunctions.autoplay
-      isPlaying ? on() : off()
-    }
-  }, [isPlaying])
+    if (c2Command === CameraCommand.nothing || demoRef.current == null) return
+    dispatchCameraCommand(demoRef.current, 1, c2Command)
+    setC2Command(CameraCommand.nothing)
+  }, [c2Command])
 
-  // Epipolar Line Predictions
-  const [showELinePredictions, setShowELinePredictions] = useState<boolean>(false)
+  // Moving
+  useEffect(() => {
+    if (demoRef.current == null) return
+    demoRef.current.modifierFunctions.enableMovement(isMoving)
+  }, [isMoving])
 
   // Frustums
-  const [showFrustums, setShowFrustums] = useState<boolean>(false)
   useEffect(() => {
-    if (demoRef.current != null) {
-      const { on, off } = demoRef.current.modifierFunctions.frustums
-      showFrustums ? on() : off()
-    }
-  }, [showFrustums])
+    if (demoRef.current == null) return
+    demoRef.current.modifierFunctions.showFrustums(otherThingsToShow.frustums)
+  }, [otherThingsToShow.frustums])
 
   // Epipolar Lines
-  const [showELines, setShowELines] = useState<boolean>(false)
   useEffect(() => {
-    if (demoRef.current != null) {
-      const { on, off } = demoRef.current.modifierFunctions.epipolarLines
-      showELines ? on() : off()
-    }
-  }, [showELines])
+    if (demoRef.current == null) return
+    demoRef.current.modifierFunctions.showEpipolarLines(otherThingsToShow.epipolarLines)
+  }, [otherThingsToShow.epipolarLines])
 
   // Helper
   function updateGUIFunction(d: DemoType) {
@@ -109,13 +150,17 @@ function DemoWindow({
     // Camera 1
     const newK = intrinsicHelper(d.cameraData[0].intrinsicMatrix.clone())
     const newM = d.cameraData[0].extrinsicMatrix.clone()
+    const newC1Pos = d.cameraData[0].camera.position.clone()
     setK((prevK) => (newK.equals(prevK) ? prevK : newK))
     setM((prevM) => (newM.equals(prevM) ? prevM : newM))
+    setC1Pos((prevC1Pos) => (newC1Pos.equals(prevC1Pos) ? prevC1Pos : newC1Pos))
     // Camera 2
     const newKp = intrinsicHelper(d.cameraData[1].intrinsicMatrix.clone())
     const newMp = d.cameraData[1].extrinsicMatrix.clone()
+    const newC2Pos = d.cameraData[0].camera.position.clone()
     setKp((prevKp) => (newKp.equals(prevKp) ? prevKp : newKp))
     setMp((prevMp) => (newMp.equals(prevMp) ? prevMp : newMp))
+    setC2Pos((prevC2Pos) => (newC1Pos.equals(prevC2Pos) ? prevC2Pos : newC2Pos))
   }
 
   // On startup
@@ -130,10 +175,10 @@ function DemoWindow({
   return (
     <div id="demo-window">
       <div>
-        <div className="container" ref={container1Ref} style={showC1 ? {} : hiddenStyle}>
+        <div className="container" ref={container1Ref} style={showC1Display ? {} : hiddenStyle}>
           <canvas className="canvas" ref={canvas1Ref} />
-          {showC1Point ? <Target x={x.x} y={x.y} className="blue" /> : null}
-          {showELinePredictions ? (
+          {otherThingsToShow.c1PointPrediction ? <Target x={x.x} y={x.y} className="blue" /> : null}
+          {otherThingsToShow.epipolarLinePredictions ? (
             <>
               <Target x={-1} y={lFunction(-1)} className="green" />
               <Target x={1} y={lFunction(1)} className="green" />
@@ -143,10 +188,10 @@ function DemoWindow({
         </div>
       </div>
       <div>
-        <div className="container" ref={container2Ref} style={showC2 ? {} : hiddenStyle}>
+        <div className="container" ref={container2Ref} style={showC2Display ? {} : hiddenStyle}>
           <canvas className="canvas" ref={canvas2Ref} />
-          {showC2Point ? <Target x={xp.x} y={xp.y} className="green" /> : null}
-          {showELinePredictions ? (
+          {otherThingsToShow.c2PointPrediction ? <Target x={xp.x} y={xp.y} className="green" /> : null}
+          {otherThingsToShow.epipolarLinePredictions ? (
             <>
               <Target x={-1} y={lpFunction(-1)} className="blue" />
               <Target x={1} y={lpFunction(1)} className="blue" />
@@ -155,19 +200,7 @@ function DemoWindow({
           <div className="container-label">{'Camera 2 (c2)'}</div>
         </div>
       </div>
-      <div>
-        <div id="demo-controls-container">
-          <button className="demo-control-button" onClick={() => setShowFrustums((prev) => !prev)}>
-            {showFrustums ? 'hide frustums' : 'show frustums'}
-          </button>
-          <button className="demo-control-button" onClick={() => setShowELines((prev) => !prev)}>
-            {showELines ? 'hide epipolar lines' : 'show epipolar lines'}
-          </button>
-          <button className="demo-control-button" onClick={() => setShowELinePredictions((prev) => !prev)}>
-            {showELinePredictions ? 'hide epipolar line predictions' : 'show epipolar line predictions'}
-          </button>
-        </div>
-      </div>
+      <div></div>
     </div>
   )
 }

@@ -1,43 +1,30 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { animate } from './animate'
-import { init } from './init'
-
-type OnOff = {
-  on: () => void
-  off: () => void
-}
+import { DemoCameraDataType, init } from './init'
 
 export type DemoType = {
-  isPlaying: boolean
-  modifierFunctions: {
-    autoplay: OnOff
-    frustums: OnOff
-    epipolarLines: OnOff
-    setC1RotationToIdentity: () => void
-    setC1ToLookAtOrigin: () => void
-    alignC1Axis: (a: 0 | 1 | 2 | null) => void
-  }
+  // For React use
+  updateGUIFunction: (d: DemoType) => void
+  // Scene data
   scene: THREE.Scene
   pointPosition: THREE.Vector3
-  updateGUIFunction: (d: DemoType) => void
   // Animation data
   nextFrameReq: number
   prevTime: DOMHighResTimeStamp
   // Camera-specific stuff
   cameraData: DemoCameraDataType[]
-}
-
-export type DemoCameraDataType = {
-  camera: THREE.PerspectiveCamera
-  cameraHelper: THREE.CameraHelper
-  line: THREE.Line
-  renderer: THREE.Renderer
-  container: HTMLElement
-  canvas: HTMLElement
-  orbitControls: OrbitControls
-  extrinsicMatrix: THREE.Matrix4
-  intrinsicMatrix: THREE.Matrix4
+  // Modifier stuff
+  isMoving: boolean
+  modifierFunctions: {
+    enableMovement: (bool: boolean) => void
+    showFrustums: (bool: boolean) => void
+    showEpipolarLines: (bool: boolean) => void
+    setPosition: (cameraNumber: number, pos: THREE.Vector3) => void
+    setLookPosition: (cameraNumber: number, pos: THREE.Vector3) => void
+    resetSetup: (cameraNumber: number) => void
+    setRotationToIdentity: (cameraNumber: number) => void
+  }
 }
 
 export function main(

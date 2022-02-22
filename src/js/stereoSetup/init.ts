@@ -1,7 +1,29 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { render } from './animate'
-import { DemoCameraDataType, DemoType } from './main'
+import { DemoType } from './main'
+import { onOrbitControlChange, setTargetLookPosition, setTargetPosition } from './update'
+
+const green = 0x5bb585
+const blue = 0x0082e7
+
+export type DemoCameraDataType = {
+  // HTML
+  container: HTMLElement
+  canvas: HTMLElement
+  // Camera
+  camera: THREE.PerspectiveCamera
+  renderer: THREE.Renderer
+  // Geometry
+  cameraHelper: THREE.CameraHelper
+  line: THREE.Line
+  // Controls
+  orbitControls: OrbitControls
+  // Data
+  targetPosition: THREE.Vector3
+  targetLookPosition: THREE.Vector3
+  extrinsicMatrix: THREE.Matrix4
+  intrinsicMatrix: THREE.Matrix4
+}
 
 export function init(
   arr: {
@@ -9,36 +31,38 @@ export function init(
     canvas: HTMLElement
   }[]
 ): DemoType {
-  // Scene
+  // Set up scene
   const scene = new THREE.Scene()
-
-  // Geometry
   const geometry = new THREE.IcosahedronGeometry(0.25)
   const material = new THREE.MeshBasicMaterial({ color: 0xe8ceb8 })
   const mesh = new THREE.Mesh(geometry, material)
   mesh.layers.enableAll()
   scene.add(mesh)
 
+  // Set up cameras
   const cameraData: DemoCameraDataType[] = []
-
   for (let i = 0; i < arr.length; i++) {
+    // Get stuff
+    const container = arr[i].container
+    const canvas = arr[i].canvas
+
     // Get screen size
-    const iw = arr[i].container.clientWidth
-    const ih = arr[i].container.clientHeight
+    const iw = container.clientWidth
+    const ih = container.clientHeight
     const aspect = iw / ih
 
-    // Camera
-    const camera = new THREE.PerspectiveCamera(30, aspect, 0.0001, 10000)
-    if (i) {
-      camera.position.set(35, 25, 35)
-    } else {
-      camera.position.set(4, 4, 20)
-    }
-    camera.lookAt(new THREE.Vector3())
+    // Set up camera
+    const camera = new THREE.PerspectiveCamera(40, aspect, 0.0001, 10000)
+    camera.position.fromArray(getInitialCameraPosition(i))
     camera.layers.set(i)
 
-    // Line to point
-    const material = new THREE.LineBasicMaterial({ color: i ? 0x5bb585 : 0x0082e7 })
+    // Set up camera helper (frustum)
+    const cameraHelper = new THREE.CameraHelper(camera)
+    cameraHelper.layers.enableAll()
+    cameraHelper.layers.disable(i)
+
+    // Set up line of sight
+    const material = new THREE.LineBasicMaterial({ color: i ? green : blue })
     const points = [camera.position, mesh.position]
     const geometry = new THREE.BufferGeometry().setFromPoints(points)
     const line = new THREE.Line(geometry, material)
@@ -46,33 +70,43 @@ export function init(
     line.layers.enableAll()
     line.layers.disable(i)
 
-    const cameraHelper = new THREE.CameraHelper(camera)
-    cameraHelper.layers.enableAll()
-    cameraHelper.layers.disable(i)
-
-    // Renderer
-    const renderer = new THREE.WebGLRenderer({ canvas: arr[i].canvas, alpha: true })
+    // Set up renderer
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true })
     renderer.setPixelRatio(window.devicePixelRatio)
     renderer.setClearColor(0xffffff, 0)
     renderer.setSize(iw, ih)
 
-    // Orbit Controls
-    const orbitControls = new OrbitControls(camera, arr[i].container)
+    // Set up controls
+    const orbitControls = new OrbitControls(camera, container)
 
-    cameraData.push({
+    // Create data object
+    const data = {
+      // HTML
+      container,
+      canvas,
+      // Camera
       camera,
+      renderer,
+      // Geometry
       cameraHelper,
       line,
-      renderer,
-      container: arr[i].container,
-      canvas: arr[i].canvas,
+      // Controls
       orbitControls,
+      // Data
+      targetPosition: new THREE.Vector3().copy(camera.position),
+      targetLookPosition: new THREE.Vector3(),
       extrinsicMatrix: camera.matrixWorldInverse,
       intrinsicMatrix: camera.projectionMatrix,
-    })
+    }
+
+    // Attach listener
+    orbitControls.addEventListener('change', () => onOrbitControlChange(data))
+
+    // Save
+    cameraData.push(data)
   }
 
-  // Helpers
+  // Set up axes
   const axesHelper = new THREE.AxesHelper(10)
   axesHelper.setColors(new THREE.Color(0xff0000), new THREE.Color(0x00ff00), new THREE.Color(0x0000ff))
   axesHelper.layers.enableAll()
@@ -83,54 +117,38 @@ export function init(
 
   // Create demo object
   let demo: DemoType = 'dummy' as any
-  const singleRender = () => requestAnimationFrame((t) => render(t, demo))
-  const isPlaying = false
-  cameraData.forEach(({ orbitControls }) => orbitControls.addEventListener('change', singleRender))
+  const isMoving = false
   demo = {
-    isPlaying,
+    isMoving,
     modifierFunctions: {
-      autoplay: {
-        on: () => {
-          demo.isPlaying = true
-          cameraData.forEach(({ orbitControls }) => orbitControls.removeEventListener('change', singleRender))
-        },
-        off: () => {
-          demo.isPlaying = false
-          cameraData.forEach(({ orbitControls }) => orbitControls.addEventListener('change', singleRender))
-        },
+      enableMovement(bool: boolean) {
+        demo.isMoving = bool
       },
-      frustums: {
-        on: () => (cameraData.forEach(({ cameraHelper }) => scene.add(cameraHelper)), singleRender()),
-        off: () => (cameraData.forEach(({ cameraHelper }) => scene.remove(cameraHelper)), singleRender()),
+      showFrustums(bool: boolean) {
+        cameraData.forEach(({ cameraHelper }) => (cameraHelper.visible = bool))
       },
-      epipolarLines: {
-        on: () => (cameraData.forEach(({ line }) => scene.add(line)), singleRender()),
-        off: () => (cameraData.forEach(({ line }) => scene.remove(line)), singleRender()),
+      showEpipolarLines(bool: boolean) {
+        cameraData.forEach(({ line }) => (line.visible = bool))
       },
-      setC1RotationToIdentity: () => {
-        const target = new THREE.Vector3(
-          cameraData[0].camera.position.x,
-          cameraData[0].camera.position.y,
-          cameraData[0].camera.position.z > 0 ? 0 : cameraData[0].camera.position.z - 1
+      setPosition(cameraNumber: number, pos: THREE.Vector3) {
+        setTargetPosition(cameraData[cameraNumber], pos)
+      },
+      setLookPosition(cameraNumber: number, pos: THREE.Vector3) {
+        setTargetLookPosition(cameraData[cameraNumber], pos)
+      },
+      resetSetup(cameraNumber: number) {
+        setTargetPosition(
+          cameraData[cameraNumber],
+          new THREE.Vector3().fromArray(getInitialCameraPosition(cameraNumber))
         )
-        cameraData[0].camera.lookAt(target)
-        cameraData[0].orbitControls.target.copy(target)
-        cameraData[0].camera.updateProjectionMatrix()
-        singleRender()
+        setTargetLookPosition(cameraData[cameraNumber], new THREE.Vector3())
       },
-      setC1ToLookAtOrigin: () => {
-        const zeroTarget = new THREE.Vector3()
-        cameraData[0].camera.lookAt(zeroTarget)
-        cameraData[0].orbitControls.target.copy(zeroTarget)
-        cameraData[0].camera.updateProjectionMatrix()
-        singleRender()
-      },
-      alignC1Axis: (a: 0 | 1 | 2 | null) => {
-        if (a == null) return
-        cameraData[0].orbitControls.target.set(0, 0, 0)
-        cameraData[0].camera.position.set(a === 0 ? 10 : 0, a === 1 ? 10 : 0, a === 2 ? 10 : 0)
-        cameraData[0].camera.updateProjectionMatrix()
-        singleRender()
+      setRotationToIdentity: (cameraNumber: number) => {
+        const data = cameraData[cameraNumber]
+        const camera = data.camera
+        const distance = data.orbitControls.getDistance()
+        const pos = new THREE.Vector3(camera.position.x, camera.position.y, camera.position.z - distance)
+        setTargetLookPosition(data, pos)
       },
     },
     scene,
@@ -143,4 +161,17 @@ export function init(
 
   // Return
   return demo
+}
+
+function getInitialCameraPosition(i: number): [number, number, number] {
+  switch (i) {
+    case 0:
+      return [4, 4, 20]
+    case 1:
+      return [35, 25, 35]
+    case 2:
+      return [0, 0, 100]
+    default:
+      return [0, 0, 0]
+  }
 }
