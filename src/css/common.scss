@@ -1,6 +1,7 @@
 @use 'sass:color';
 @use 'sass:math';
 @import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@300;325;350;375;400;425;450;475;500;525;550;575;600;625;650;675;700;725;750;775;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 // ======================================================================== RESPONSIVE
 
@@ -67,30 +68,32 @@ $scroll-container-inset: linear(20, 50) 20px;
 // ======================================================================== TEXT
 
 $inconsolata: 'Inconsolata', monospace;
+$outfit: 'Outfit', sans-serif;
 
-$title-font-family: $inconsolata;
+$title-font-family: $outfit;
 $title-font-size: 1.25rem;
-$title-font-weight: 550;
+$title-font-weight: 400;
 $title-font-color: $light-dark;
 $title-line-height: 1.1;
+$title-highlight-color: $blue-black;
 
 $body-font-family: $inconsolata;
 $body-font-size: 1rem;
-$body-font-weight: 350;
+$body-font-weight: 325;
 $body-font-color: $light-dark-dark;
 $body-line-height: 1.4;
 $body-bold-font-weight: 550;
-$body-bold-color: $light-dark;
+$body-bold-font-color: $light-dark;
 
 $blockquote-line-color: color.change($light-dark-dark, $alpha: 0.25);
 $blockquote-background-color: $matrix-equation-color;
 
 $matrix-font-size: 0.9375rem;
-$matrix-font-weight: 350;
+$matrix-font-weight: 325;
 $matrix-font-color: $light-dark;
 
 $label-font-size: 0.75rem;
-$label-font-weight: 350;
+$label-font-weight: 325;
 $label-font-color: $light-dark;
 
 $text-vert-spacing: $body-font-size * $body-line-height * 0.65;
@@ -155,7 +158,7 @@ body {
 
   strong {
     font-weight: $body-bold-font-weight;
-    color: $body-bold-color;
+    color: $body-bold-font-color;
   }
 
   > blockquote {
@@ -189,8 +192,8 @@ body {
 
   font-family: $body-font-family;
   font-size: $body-font-size;
-  font-weight: $body-font-weight;
-  color: $body-font-color;
+  font-weight: $body-bold-font-weight;
+  color: $body-bold-font-color;
   line-height: $body-line-height;
 
   transform: scale(1);
