@@ -105,16 +105,10 @@ function App() {
 
   // States
   const scrollRef = useRef<any>()
-  const [c1EquationRef, showC1Display] = useScrollWatcher({
-    root: scrollRef.current,
-    rootMargin: '0px',
-    threshold: 1.0,
-  })
-  const [c2EquationRef, showC2Display] = useScrollWatcher({
-    root: scrollRef.current,
-    rootMargin: '0px',
-    threshold: 1.0,
-  })
+  const options = { root: scrollRef.current, rootMargin: '0px', threshold: 1.0 }
+  const [c1ScrollAppearRef, showC1Display] = useScrollWatcher(options)
+  const [c2ScrollAppearRef, showC2Display] = useScrollWatcher(options)
+  const [c3ScrollAppearRef, showC3Display] = useScrollWatcher(options)
 
   // Controls to interact with demo
   const [isMoving, setIsMoving] = useState<boolean>(false)
@@ -152,6 +146,7 @@ function App() {
           setC2Pos,
           showC2Display,
           // Stuff
+          showC3Display,
           otherThingsToShow,
           // Control function triggers
           c1Command,
@@ -252,7 +247,7 @@ function App() {
               </p>
             </div>
 
-            <div className="matrix-equation" ref={c1EquationRef}>
+            <div className="matrix-equation" ref={c1ScrollAppearRef}>
               <span>{'Camera 1 has'}</span>
               <Matrix33Display label={'intrinsic matrix, K'} matrix={K} />
               <span>{', '}</span>
@@ -418,7 +413,7 @@ function App() {
               </p>
             </div>
 
-            <div className="matrix-equation" ref={c2EquationRef}>
+            <div className="matrix-equation" ref={c2ScrollAppearRef}>
               <span>{'Camera 2 has'}</span>
               <Matrix33Display label={'intrinsic matrix, Kp'} matrix={Kp} />
               <span>{', '}</span>
@@ -498,8 +493,11 @@ function App() {
             </h2>
 
             <div className="body-text">
-              <p>{"Surprise! Here's yet another camera."}</p>
-              <p>{'[TODO: set up witness camera]'}</p>
+              <p ref={c3ScrollAppearRef}>
+                {"Surprise! Here's yet "}
+                <em>{'another'}</em>
+                {' camera. '}
+              </p>
               <p>
                 {'This one\'s just for reference (we\'ll call it the "witness camera"). '}
                 {"We won't be using it in any calculations or anything."}

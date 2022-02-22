@@ -69,6 +69,7 @@ type DemoWindowProps = {
   setC2Pos: React.Dispatch<React.SetStateAction<THREE.Vector3>>
   showC2Display: boolean
   // Stuff
+  showC3Display: boolean
   otherThingsToShow: OtherThingsToShow
   // Control function triggers
   c1Command: CameraCommand
@@ -97,6 +98,7 @@ function DemoWindow({
   setC2Pos,
   showC2Display,
   // Stuff
+  showC3Display,
   otherThingsToShow,
   // Control function triggers
   c1Command,
@@ -110,6 +112,8 @@ function DemoWindow({
   const canvas1Ref = useRef<any>()
   const container2Ref = useRef<any>()
   const canvas2Ref = useRef<any>()
+  const container3Ref = useRef<any>()
+  const canvas3Ref = useRef<any>()
 
   // Camera 1
   useEffect(() => {
@@ -169,7 +173,14 @@ function DemoWindow({
 
   // On startup
   useEffect(() => {
-    demoRef.current = main(container1Ref.current, canvas1Ref.current, container2Ref.current, canvas2Ref.current)
+    demoRef.current = main(
+      container1Ref.current,
+      canvas1Ref.current,
+      container2Ref.current,
+      canvas2Ref.current,
+      container3Ref.current,
+      canvas3Ref.current
+    )
     demoRef.current.updateGUIFunction = updateGUIFunction
     updateGUIFunction(demoRef.current)
   }, [])
@@ -204,7 +215,12 @@ function DemoWindow({
           <div className="container-label">{'Camera 2 (c2)'}</div>
         </div>
       </div>
-      <div></div>
+      <div>
+        <div className="container" ref={container3Ref} style={showC3Display ? {} : hiddenStyle}>
+          <canvas className="canvas" ref={canvas3Ref} />
+          <div className="container-label">{'Witness Camera'}</div>
+        </div>
+      </div>
     </div>
   )
 }

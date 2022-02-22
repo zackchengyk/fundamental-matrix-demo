@@ -31,12 +31,15 @@ export function main(
   container1: HTMLElement,
   canvas1: HTMLElement,
   container2: HTMLElement,
-  canvas2: HTMLElement
-) {
+  canvas2: HTMLElement,
+  container3: HTMLElement,
+  canvas3: HTMLElement
+): DemoType {
   // Create a new instance
   const demo = init([
     { container: container1, canvas: canvas1 },
     { container: container2, canvas: canvas2 },
+    { container: container3, canvas: canvas3 },
   ])
 
   // Start the animation loop

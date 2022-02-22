@@ -170,11 +170,11 @@ export function init(
 function getInitialCameraPosition(i: number): [number, number, number] {
   switch (i) {
     case 0:
-      return [4, 4, 20]
+      return [5, 5, 20]
     case 1:
-      return [35, 25, 35]
+      return [30, 20, 10]
     case 2:
-      return [0, 0, 100]
+      return [30, 60, 30]
     default:
       return [0, 0, 0]
   }
