@@ -13,6 +13,10 @@ export enum CameraCommand {
   useStandardViewX,
   useStandardViewY,
   useStandardViewZ,
+  setRotationToMatchC1,
+  setRotationToMatchC2,
+  setPositionToMatchC1,
+  setPositionToMatchC2,
 }
 
 const charWidth = 5

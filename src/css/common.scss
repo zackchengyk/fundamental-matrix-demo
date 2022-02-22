@@ -90,6 +90,7 @@ $blockquote-background-color: $matrix-equation-color;
 
 $matrix-font-size: 0.9375rem;
 $matrix-font-weight: 325;
+$matrix-bold-font-weight: 550;
 $matrix-big-font-size: 1.875rem;
 $matrix-big-font-weight: 250;
 $matrix-font-color: $light-dark;
@@ -196,6 +197,20 @@ body {
   }
 }
 
+@mixin hover-scale($max-scale) {
+  transform: scale(1);
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale($max-scale);
+  }
+
+  &:active {
+    transform: scale(1);
+    transition: transform 0.1s ease;
+  }
+}
+
 .control-button {
   border: $line;
   padding: 0.5ch 1ch;
@@ -211,14 +226,5 @@ body {
   color: $body-bold-font-color;
   line-height: $body-line-height;
 
-  transform: scale(1);
-  transition: transform 0.2s ease;
-
-  &:hover {
-    transform: scale(1.05);
-  }
-
-  &:active {
-    transform: scale(1);
-  }
+  @include hover-scale(1.05);
 }

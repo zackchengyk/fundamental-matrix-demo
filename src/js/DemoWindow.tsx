@@ -4,6 +4,7 @@ import { CameraCommand, intrinsicHelper, SceneCommand } from './common'
 import { DemoType, main } from './stereoSetup/main'
 import { OtherThingsToShow } from './App'
 import '../css/DemoWindow.scss'
+import { LookDirUpdateMode } from './stereoSetup/update'
 
 function Target({ x, y, className }: { x: number; y: number; className: string }) {
   // Note: bottom left = [1,1]; top right = [-1,-1]
@@ -17,33 +18,77 @@ function Target({ x, y, className }: { x: number; y: number; className: string }
   )
 }
 
-function dispatchCameraCommand(demoRef: DemoType, cameraNumber: number, command: CameraCommand) {
+function dispatchCameraCommand(demo: DemoType, cameraNumber: number, command: CameraCommand) {
   switch (command) {
     case CameraCommand.setLookPositionToOrigin: {
-      demoRef.modifierFunctions.setLookPosition(cameraNumber, new THREE.Vector3())
+      demo.modifierFunctions.setLookPosition(cameraNumber, new THREE.Vector3())
       break
     }
     case CameraCommand.setRotationToIdentity: {
-      demoRef.modifierFunctions.setRotationToIdentity(cameraNumber)
+      demo.modifierFunctions.setRotationToIdentity(cameraNumber)
       break
     }
     case CameraCommand.resetTransforms: {
-      demoRef.modifierFunctions.resetSetup(cameraNumber)
+      demo.modifierFunctions.resetTransforms(cameraNumber)
       break
     }
     case CameraCommand.useStandardViewX: {
-      demoRef.modifierFunctions.setPosition(cameraNumber, new THREE.Vector3(10, 0, 0))
-      demoRef.modifierFunctions.setLookPosition(cameraNumber, new THREE.Vector3())
+      demo.modifierFunctions.setPosition(
+        cameraNumber,
+        new THREE.Vector3(10, 0, 0),
+        LookDirUpdateMode.exactToLookAt
+      )
+      demo.modifierFunctions.setLookPosition(cameraNumber, new THREE.Vector3())
       break
     }
     case CameraCommand.useStandardViewY: {
-      demoRef.modifierFunctions.setPosition(cameraNumber, new THREE.Vector3(0, 10, 0))
-      demoRef.modifierFunctions.setLookPosition(cameraNumber, new THREE.Vector3())
+      demo.modifierFunctions.setPosition(
+        cameraNumber,
+        new THREE.Vector3(0, 10, 0),
+        LookDirUpdateMode.exactToLookAt
+      )
+      demo.modifierFunctions.setLookPosition(cameraNumber, new THREE.Vector3())
       break
     }
     case CameraCommand.useStandardViewZ: {
-      demoRef.modifierFunctions.setPosition(cameraNumber, new THREE.Vector3(0, 0, 10))
-      demoRef.modifierFunctions.setLookPosition(cameraNumber, new THREE.Vector3())
+      demo.modifierFunctions.setPosition(
+        cameraNumber,
+        new THREE.Vector3(0, 0, 10),
+        LookDirUpdateMode.exactToLookAt
+      )
+      demo.modifierFunctions.setLookPosition(cameraNumber, new THREE.Vector3())
+      break
+    }
+    case CameraCommand.setRotationToMatchC1: {
+      break
+    }
+    case CameraCommand.setRotationToMatchC2: {
+      break
+    }
+    case CameraCommand.setPositionToMatchC1: {
+      demo.modifierFunctions.setPosition(
+        cameraNumber,
+        demo.cameraData[0].camera.position,
+        LookDirUpdateMode.maintainDirection
+      )
+      const newLookPosition = demo.cameraData[cameraNumber].targetLookPosition
+        .clone()
+        .add(demo.cameraData[0].camera.position)
+        .sub(demo.cameraData[cameraNumber].camera.position)
+      demo.modifierFunctions.setLookPosition(cameraNumber, newLookPosition)
+      break
+    }
+    case CameraCommand.setPositionToMatchC2: {
+      demo.modifierFunctions.setPosition(
+        cameraNumber,
+        demo.cameraData[1].camera.position,
+        LookDirUpdateMode.maintainDirection
+      )
+      const newLookPosition = demo.cameraData[cameraNumber].targetLookPosition
+        .clone()
+        .add(demo.cameraData[1].camera.position)
+        .sub(demo.cameraData[cameraNumber].camera.position)
+      demo.modifierFunctions.setLookPosition(cameraNumber, newLookPosition)
       break
     }
   }

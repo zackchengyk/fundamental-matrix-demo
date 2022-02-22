@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { animate } from './animate'
 import { DemoCameraDataType, init } from './init'
+import { LookDirUpdateMode } from './update'
 
 export type DemoType = {
   // For React use
@@ -22,9 +23,9 @@ export type DemoType = {
     setPointPosition: (pos: THREE.Vector3 | null) => void
     showFrustum: (cameraNumber: number, bool: boolean) => void
     showEpipolarLines: (bool: boolean) => void
-    setPosition: (cameraNumber: number, pos: THREE.Vector3) => void
+    setPosition: (cameraNumber: number, pos: THREE.Vector3, lookDirUpdateMode?: LookDirUpdateMode) => void
     setLookPosition: (cameraNumber: number, pos: THREE.Vector3) => void
-    resetSetup: (cameraNumber: number) => void
+    resetTransforms: (cameraNumber: number) => void
     setRotationToIdentity: (cameraNumber: number) => void
   }
 }

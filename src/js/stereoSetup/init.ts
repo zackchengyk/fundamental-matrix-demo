@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { DemoType } from './main'
-import { onOrbitControlChange, setTargetLookPosition, setTargetPosition } from './update'
+import { LookDirUpdateMode, onOrbitControlChange, setTargetLookPosition, setTargetPosition } from './update'
 
 const green = 0x5bb585
 const blue = 0x0082e7
@@ -21,6 +21,7 @@ export type DemoCameraDataType = {
   // Data
   targetPosition: THREE.Vector3
   targetLookPosition: THREE.Vector3
+  lookDirUpdateMode: LookDirUpdateMode
   extrinsicMatrix: THREE.Matrix4
   intrinsicMatrix: THREE.Matrix4
 }
@@ -58,10 +59,9 @@ export function init(
 
     // Set up camera helper (frustum)
     const cameraHelper = new THREE.CameraHelper(camera)
-    cameraHelper.layers.enableAll()
-    // cameraHelper.layers.disable(i)
-    cameraHelper.visible = false
-    scene.add(cameraHelper)
+    cameraHelper.layers.disableAll()
+    cameraHelper.layers.enable(2)
+    if (i !== 2) scene.add(cameraHelper)
 
     // Set up line of sight
     const material = new THREE.LineBasicMaterial({ color: i ? green : blue })
@@ -72,7 +72,7 @@ export function init(
     line.layers.enableAll()
     line.layers.disable(i)
     line.visible = false
-    scene.add(line)
+    if (i !== 2) scene.add(line)
 
     // Set up renderer
     const renderer = new THREE.WebGLRenderer({ canvas, alpha: true })
@@ -99,6 +99,7 @@ export function init(
       // Data
       targetPosition: new THREE.Vector3().copy(camera.position),
       targetLookPosition: new THREE.Vector3(),
+      lookDirUpdateMode: LookDirUpdateMode.slerpToLookAt,
       extrinsicMatrix: camera.matrixWorldInverse,
       intrinsicMatrix: camera.projectionMatrix,
     }
@@ -132,21 +133,27 @@ export function init(
         if (pos != null) demo.fixedPointPosition = pos.clone()
       },
       showFrustum(cameraNumber: number, bool: boolean) {
-        cameraData[cameraNumber].cameraHelper.visible = bool
+        if (bool) {
+          cameraData[cameraNumber].cameraHelper.layers.enableAll()
+        } else {
+          cameraData[cameraNumber].cameraHelper.layers.disableAll()
+          cameraData[cameraNumber].cameraHelper.layers.enable(2)
+        }
       },
       showEpipolarLines(bool: boolean) {
         cameraData.forEach(({ line }) => (line.visible = bool))
       },
-      setPosition(cameraNumber: number, pos: THREE.Vector3) {
-        setTargetPosition(cameraData[cameraNumber], pos)
+      setPosition(cameraNumber: number, pos: THREE.Vector3, lookDirUpdateMode?: LookDirUpdateMode) {
+        setTargetPosition(cameraData[cameraNumber], pos, lookDirUpdateMode)
       },
       setLookPosition(cameraNumber: number, pos: THREE.Vector3) {
         setTargetLookPosition(cameraData[cameraNumber], pos)
       },
-      resetSetup(cameraNumber: number) {
+      resetTransforms(cameraNumber: number) {
         setTargetPosition(
           cameraData[cameraNumber],
-          new THREE.Vector3().fromArray(getInitialCameraPosition(cameraNumber))
+          new THREE.Vector3().fromArray(getInitialCameraPosition(cameraNumber)),
+          LookDirUpdateMode.slerpToLookAt
         )
         setTargetLookPosition(cameraData[cameraNumber], new THREE.Vector3())
       },

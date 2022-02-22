@@ -3,6 +3,14 @@ import { quaternionEquals, vector3Equals } from '../common'
 import { DemoCameraDataType } from './init'
 import { DemoType } from './main'
 
+export enum LookDirUpdateMode {
+  anything,
+  maintainDirection,
+  exactToLookAt,
+  slerpToLookAt,
+}
+
+const speed = 12
 const dummyVector = new THREE.Vector3()
 const dummyMatrix = new THREE.Matrix4()
 const dummyQuaternion = new THREE.Quaternion()
@@ -12,7 +20,12 @@ export function onOrbitControlChange(data: DemoCameraDataType) {
   setTargetLookPosition(data, data.orbitControls.target)
 }
 
-export function setTargetPosition(data: DemoCameraDataType, pos: THREE.Vector3) {
+export function setTargetPosition(
+  data: DemoCameraDataType,
+  pos: THREE.Vector3,
+  lookDirUpdateMode?: LookDirUpdateMode
+) {
+  data.lookDirUpdateMode = lookDirUpdateMode == null ? LookDirUpdateMode.anything : lookDirUpdateMode
   data.targetPosition.copy(pos)
 }
 
@@ -48,13 +61,15 @@ export function updateScene(time: DOMHighResTimeStamp, demo: DemoType): void {
   }
 
   // For each camera
-  for (const data of demo.cameraData) {
+  for (let i = 0; i < 3; i++) {
+    const data = demo.cameraData[i]
+
     // Get stuff
     const camera = data.camera
     const line = data.line
     const orbitControls = data.orbitControls
     let isTranslating = false
-    let isFarOff = false
+    let isRotating = false
 
     // Update position of camera if necessary
     const targetPosition = data.targetPosition
@@ -62,31 +77,49 @@ export function updateScene(time: DOMHighResTimeStamp, demo: DemoType): void {
     const norm = dummyVector.length()
     if (norm > 0.0001) {
       isTranslating = true
-      isFarOff = norm > 0.1
-      const step = 15 * deltaTime // Approximate lerp-ing
+      const step = speed * deltaTime // Approximate lerp-ing
       camera.position.lerp(targetPosition, step)
       camera.updateProjectionMatrix()
+      if (
+        data.lookDirUpdateMode === LookDirUpdateMode.anything ||
+        data.lookDirUpdateMode === LookDirUpdateMode.exactToLookAt
+      ) {
+        // If not already set to maintain, update exactly if far away
+        data.lookDirUpdateMode = norm > 0.5 ? LookDirUpdateMode.exactToLookAt : LookDirUpdateMode.slerpToLookAt
+      }
+    } else {
+      // Not translating
+      data.lookDirUpdateMode = LookDirUpdateMode.slerpToLookAt
     }
 
+    if (i === 1) console.log(data.lookDirUpdateMode)
+
     // Update angle of camera if necessary
-    if (isFarOff) {
-      // Translation still has a ways to go: match look position exactly
-      camera.lookAt(data.targetLookPosition)
-    } else {
-      // Translation is close to complete: can afford to slerp
-      dummyMatrix.lookAt(camera.position, data.targetLookPosition, camera.up)
-      dummyQuaternion.setFromRotationMatrix(dummyMatrix)
-      if (!quaternionEquals(camera.quaternion, dummyQuaternion, 0.0001)) {
-        // Must rotate
-        const step = 5 * deltaTime // Approximate slerp-ing
-        camera.quaternion.slerp(dummyQuaternion, step)
-        camera.updateProjectionMatrix()
-      } else if (!isTranslating) {
-        // Translation IS complete
-        orbitControls.update()
-      } else {
-        // Translation is not complete, and rotation is not needed
+    switch (data.lookDirUpdateMode) {
+      case LookDirUpdateMode.maintainDirection: {
+        break
       }
+      case LookDirUpdateMode.exactToLookAt: {
+        orbitControls.target.copy(data.targetLookPosition)
+        camera.lookAt(data.targetLookPosition)
+        break
+      }
+      case LookDirUpdateMode.slerpToLookAt: {
+        dummyVector.copy(data.targetLookPosition).add(camera.position).sub(data.targetPosition)
+        dummyMatrix.lookAt(camera.position, dummyVector, camera.up)
+        dummyQuaternion.setFromRotationMatrix(dummyMatrix)
+        if (!quaternionEquals(camera.quaternion, dummyQuaternion, 0.0001)) {
+          isRotating = true
+          const step = speed * deltaTime // Approximate slerp-ing
+          data.orbitControls.target.copy(dummyVector)
+          camera.quaternion.slerp(dummyQuaternion, step)
+          camera.updateProjectionMatrix()
+        }
+        break
+      }
+    }
+    if (!isTranslating && !isRotating) {
+      orbitControls.update()
     }
 
     // Update lines of sight

@@ -30,6 +30,34 @@
     font-size: $matrix-big-font-size;
     font-weight: $matrix-big-font-weight;
   }
+
+  &.collapsible {
+    cursor: pointer;
+
+    @include hover-scale(1.01);
+  }
+
+  &.collapsed {
+    > span {
+      top: unset;
+    }
+
+    .matrix-elements,
+    .matrix::before,
+    .matrix::after {
+      display: none;
+    }
+
+    .matrix {
+      grid-template-areas: 'a a a';
+    }
+
+    .matrix-label {
+      background-color: color.change($panel-color, $alpha: 0.5);
+      padding: 0 1ch;
+      font-size: unset;
+    }
+  }
 }
 
 .blue {

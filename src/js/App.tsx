@@ -11,6 +11,7 @@ import Vector3Display from './matrixDisplay/Vector3Display'
 import Matrix34Display from './matrixDisplay/Matrix34Display'
 import DemoWindow from './DemoWindow'
 import useScrollWatcher from './useScrollWatcher'
+import MatrixEquation from './matrixDisplay/MatrixEquation'
 
 const proExample = new THREE.Matrix4().fromArray([
   'a',
@@ -196,13 +197,13 @@ function App() {
               </p>
             </div>
 
-            <div className="matrix-equation">
+            <MatrixEquation>
               <Matrix34Display label={'projection matrix'} matrix={proExample} />
               <span className="big">{'='}</span>
               <Matrix33Display label={'intrinsic matrix'} matrix={intExample} />
               <span>{'*'}</span>
               <Matrix34Display label={'extrinsic matrix'} matrix={extExample} />
-            </div>
+            </MatrixEquation>
 
             <div className="body-text">
               <p>
@@ -253,14 +254,14 @@ function App() {
               </p>
             </div>
 
-            <div className="matrix-equation" ref={c1ScrollAppearRef}>
+            <MatrixEquation ref={c1ScrollAppearRef}>
               <span>{'Camera 1 has'}</span>
               <Matrix33Display label={'intrinsic matrix, K'} matrix={K} />
               <span>{', '}</span>
               <Matrix34Display label={'extrinsic matrix, M'} matrix={M} />
               <span>{', and'}</span>
               <Vector3Display label={'position'} vector={c1Pos} />
-            </div>
+            </MatrixEquation>
 
             <div className="body-text">
               <p>
@@ -326,7 +327,7 @@ function App() {
               </p>
             </div>
 
-            <div className="matrix-equation">
+            <MatrixEquation>
               <Matrix33Display label={'intrinsic matrix, K'} matrix={K} />
               <span>{'*'}</span>
               <Matrix34Display label={'extrinsic matrix, M'} matrix={M} />
@@ -337,7 +338,7 @@ function App() {
               <span className="big">{'='}</span>
               <span className="limit-dp">{limitDpHelper(result.z)}</span>
               <Vector3Display label={'image coord, x'} vector={x} className="blue" />
-            </div>
+            </MatrixEquation>
 
             <div className="body-text">
               <p>
@@ -418,14 +419,14 @@ function App() {
               </p>
             </div>
 
-            <div className="matrix-equation" ref={c2ScrollAppearRef}>
+            <MatrixEquation ref={c2ScrollAppearRef}>
               <span>{'Camera 2 has'}</span>
               <Matrix33Display label={'intrinsic matrix, Kp'} matrix={Kp} />
               <span>{', '}</span>
               <Matrix34Display label={'extrinsic matrix, Mp'} matrix={Mp} />
               <span>{', and'}</span>
               <Vector3Display label={'position'} vector={c2Pos} />
-            </div>
+            </MatrixEquation>
 
             <div className="body-text">
               <p>
@@ -437,7 +438,7 @@ function App() {
               </p>
             </div>
 
-            <div className="matrix-equation">
+            <MatrixEquation>
               <Matrix33Display label={"intrinsic matrix, K'"} matrix={Kp} />
               <span>{'*'}</span>
               <Matrix34Display label={"extrinsic matrix, M'"} matrix={Mp} />
@@ -448,7 +449,7 @@ function App() {
               <span className="big">{'='}</span>
               <span className="limit-dp">{limitDpHelper(resultp.z)}</span>
               <Vector3Display label={"image coord, x'"} vector={xp} className="green" />
-            </div>
+            </MatrixEquation>
 
             <div className="body-text">
               <p>
@@ -598,7 +599,7 @@ function App() {
               </p>
             </div>
 
-            <div className="matrix-equation">
+            <MatrixEquation>
               <Matrix33Display label={'intrinsic matrix, K'} matrix={K} />
               <span>{'*'}</span>
               <Matrix34Display label={'extrinsic matrix, M'} matrix={M} className="blue last" />
@@ -608,7 +609,7 @@ function App() {
               <Matrix33Display label={'intrinsic matrix, K'} matrix={K} />
               <span>{'*'}</span>
               <Vector3Display label={'M * X'} vector={MX} className="blue all" />
-            </div>
+            </MatrixEquation>
 
             <div className="body-text">
               <blockquote>
@@ -690,17 +691,17 @@ function App() {
               </p>
             </div>
 
-            <div className="matrix-equation">
-              <Matrix34Display label={'extrinsic matrix, M'} matrix={M} className="blue last" />
+            <MatrixEquation initialCollapse={true}>
+              <Matrix34Display label={'M'} matrix={M} className="blue last" />
               <span>{'*'}</span>
-              <Vector4Display label={'world coord, X'} vector={X} />
+              <Vector4Display label={'X'} vector={X} />
               <span className="big">{'='}</span>
               <Vector3Display label={'camera 1 space coord'} vector={MX} className="blue all" />
-            </div>
+            </MatrixEquation>
 
             <div className="body-text">
               <p>
-                {'We want to re-arrange this to have X on the left-hand side. '}
+                {'We want to rearrange this so that X is on the left-hand side. '}
                 {'To do this, we will pretend that M is a '}
                 <strong>{'square matrix'}</strong>
                 {' with [0,\u00a00,\u00a00,\u00a01] on the bottom row, so that we can take its '}
@@ -711,59 +712,103 @@ function App() {
               </p>
             </div>
 
-            <div className="matrix-equation">
-              <Matrix34Display label={'extrinsic matrix, M'} matrix={M} />
-              <span className="big">{'->'}</span>
-              <Matrix44Display label={'extrinsic matrix, M'} matrix={M} />
-              <span className="big">{'->'}</span>
+            <MatrixEquation initialCollapse={true}>
+              <Matrix34Display label={'M (3 x 4)'} matrix={M} />
+              <span className="big">{'→'}</span>
+              <Matrix44Display label={'M (4 x 4)'} matrix={M} />
+              <span className="big">{'→'}</span>
               <Matrix44Display label={'inverse of extrinsic matrix, M\u207B\u00B9'} matrix={M_inv} />
-            </div>
-
-            <div className="body-text">
-              <p>{'Now, we can rearrange the earlier equation:'}</p>
-            </div>
-
-            <div className="matrix-equation">
-              <Vector4Display label={'world coord, X'} vector={X} />
-              <span className="big">{'='}</span>
-              <Matrix44Display label={'inverse of extrinsic matrix, M\u207B\u00B9'} matrix={M_inv} />
-              <span>{'*'}</span>
-              <Vector3Display label={'camera 1 space coord'} vector={MX} className="blue all" />
-            </div>
+            </MatrixEquation>
 
             <div className="body-text">
               <p>
-                {'Then, if we wanted to get to '}
+                {"We'll also have to "}
+                <strong>{'homogenize'}</strong>
+                {' the camera space coordinate, by sticking a 1 on the bottom. '}
+                {'Then, we can rearrange the earlier equation:'}
+              </p>
+            </div>
+
+            <MatrixEquation initialCollapse={true}>
+              <Vector4Display label={'X'} vector={X} />
+              <span className="big">{'='}</span>
+              <Matrix44Display label={'M\u207B\u00B9'} matrix={M_inv} />
+              <span>{'*'}</span>
+              <Vector4Display label={'camera 1 space coord'} vector={MX} className="blue all" />
+            </MatrixEquation>
+
+            <div className="body-text">
+              <p>
+                {'Now, if we want to get to '}
                 <strong>{"camera 2's"}</strong>
-                {' space, we could just left-multiply by '}
+                {' space, we can just left-multiply by '}
                 <strong>
                   <em>{'its'}</em>
                   {" extrinsic matrix, M'"}
                 </strong>
-                {". Note that we have to do the same trick to make M' 4\u00a0x\u00a04:"}
+                {"! (Note that we have to do the same trick to make M' 4\u00a0x\u00a04):"}
               </p>
             </div>
 
-            <div className="matrix-equation">
+            <MatrixEquation initialCollapse={true}>
               <Vector4Display label={'camera 2 space coord'} vector={MpX} className="green all" />
               <span className="big">{'='}</span>
               <Matrix44Display label={"M'"} matrix={Mp} />
               <span>{'*'}</span>
               <Matrix44Display label={'M\u207B\u00B9'} matrix={M_inv} />
               <span>{'*'}</span>
-              <Vector3Display label={'camera 1 space coord'} vector={MX} className="blue all" />
-            </div>
+              <Vector4Display label={'camera 1 space coord'} vector={MX} className="blue all" />
+            </MatrixEquation>
 
             <div className="body-text">
               <p>{"Finally, to make our lives easier, we can combine M' * M\u207B\u00B9 into a single matrix:"}</p>
             </div>
 
-            <div className="matrix-equation">
+            <MatrixEquation>
               <Matrix34Display label={"M'"} matrix={Mp} />
               <span>{'*'}</span>
               <Matrix34Display label={'M\u207B\u00B9'} matrix={M_inv} />
               <span className="big">{'='}</span>
               <Matrix44Display label={'camera 1 space to camera 2 space'} matrix={cam1ToCam2} />
+            </MatrixEquation>
+
+            <div className="body-text">
+              <p>
+                {"As always, you're "}
+                <em>{'highly'}</em>
+                {' encouraged to mess around with the positions of c1 and c2'}
+                {', and see how the above matrix changes!'}
+              </p>
+              <p>
+                <button
+                  className="control-button"
+                  onClick={() => setC1Command(CameraCommand.setRotationToMatchC2)}>
+                  {'Rotate c1 to match c2'}
+                </button>{' '}
+                <button
+                  className="control-button"
+                  onClick={() => setC1Command(CameraCommand.setPositionToMatchC2)}>
+                  {'Translate c1 to match c2'}
+                </button>{' '}
+                <button className="control-button" onClick={() => setC1Command(CameraCommand.resetTransforms)}>
+                  {'Reset c1'}
+                </button>
+              </p>
+              <p>
+                <button
+                  className="control-button"
+                  onClick={() => setC2Command(CameraCommand.setRotationToMatchC1)}>
+                  {'Rotate c2 to match c1'}
+                </button>{' '}
+                <button
+                  className="control-button"
+                  onClick={() => setC2Command(CameraCommand.setPositionToMatchC1)}>
+                  {'Translate c2 to match c1'}
+                </button>{' '}
+                <button className="control-button" onClick={() => setC2Command(CameraCommand.resetTransforms)}>
+                  {'Reset c2'}
+                </button>
+              </p>
             </div>
 
             <h2 id="relative-rotation-and-translation" className="title-text">
@@ -777,14 +822,14 @@ function App() {
               </p>
             </div>
 
-            <div className="matrix-equation">
+            <MatrixEquation>
               <span>{' break '}</span>
               <Matrix44Display label={'camera 1 space to camera 2 space'} matrix={cam1ToCam2} />
               <span>{' into '}</span>
               <Matrix33Display label={'left side, defined as R\u1D40'} matrix={R} />
               <span>{' and '}</span>
               <Vector3Display label={'right side, defined as -(R\u1D40 * T)'} vector={minusRtT} />
-            </div>
+            </MatrixEquation>
 
             <div className="matrix-equation">
               <span>{'From R\u1D40 and -(R\u1D40 * T), we can then get '}</span>
