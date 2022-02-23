@@ -14,39 +14,41 @@ import useScrollWatcher from './useScrollWatcher'
 import MatrixEquation from './matrixDisplay/MatrixEquation'
 
 const proExample = new THREE.Matrix4().fromArray([
-  'a',
-  'e',
+  // @ts-ignore
+  'a', // @ts-ignore
+  'e', // @ts-ignore
   'i',
-  0,
-  'b',
-  'f',
+  0, // @ts-ignore
+  'b', // @ts-ignore
+  'f', // @ts-ignore
   'j',
-  0,
-  'c',
-  'g',
+  0, // @ts-ignore
+  'c', // @ts-ignore
+  'g', // @ts-ignore
   'k',
-  0,
-  'd',
-  'h',
+  0, // @ts-ignore
+  'd', // @ts-ignore
+  'h', // @ts-ignore
   'l',
   0,
-])
+]) // @ts-ignore
 const intExample = new THREE.Matrix3().fromArray(['fx', 0, 0, 's', 'fy', 0, 'u0', 'v0', 1])
 const extExample = new THREE.Matrix4().fromArray([
-  'r11',
-  'r21',
+  // @ts-ignore
+  'r11', // @ts-ignore
+  'r21', // @ts-ignore
   'r31',
-  0,
-  'r12',
-  'r22',
+  0, // @ts-ignore
+  'r12', // @ts-ignore
+  'r22', // @ts-ignore
   'r32',
-  0,
-  'r13',
-  'r23',
+  0, // @ts-ignore
+  'r13', // @ts-ignore
+  'r23', // @ts-ignore
   'r33',
-  0,
-  'tx',
-  'ty',
+  0, // @ts-ignore
+  'tx', // @ts-ignore
+  'ty', // @ts-ignore
   'tz',
   0,
 ])
@@ -1265,13 +1267,13 @@ function App() {
               <Vector3Display label={"l'"} vector={lp} className="blue all" />
             </MatrixEquation>
 
-            <div className="matrix-equation">
+            <MatrixEquation>
               <Matrix33Display label={'F\u1D40'} matrix={Ft} />
               <span>{'*'}</span>
               <Vector3Display label={"x'"} vector={xp} className="green" />
               <span className="big">{'='}</span>
               <Vector3Display label={'l'} vector={l} className="green all" />
-            </div>
+            </MatrixEquation>
 
             <div className="body-text">
               <p>{'The lines are represented in vector form, but they can be read:'}</p>
