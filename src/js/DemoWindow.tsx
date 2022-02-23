@@ -60,9 +60,19 @@ function dispatchCameraCommand(demo: DemoType, cameraNumber: number, command: Ca
       break
     }
     case CameraCommand.setRotationToMatchC1: {
+      const newLookPosition = demo.cameraData[0].targetLookPosition
+        .clone()
+        .sub(demo.cameraData[0].camera.position)
+        .add(demo.cameraData[cameraNumber].camera.position)
+      demo.modifierFunctions.setLookPosition(cameraNumber, newLookPosition)
       break
     }
     case CameraCommand.setRotationToMatchC2: {
+      const newLookPosition = demo.cameraData[1].targetLookPosition
+        .clone()
+        .sub(demo.cameraData[1].camera.position)
+        .add(demo.cameraData[cameraNumber].camera.position)
+      demo.modifierFunctions.setLookPosition(cameraNumber, newLookPosition)
       break
     }
     case CameraCommand.setPositionToMatchC1: {

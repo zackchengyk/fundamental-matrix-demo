@@ -83,26 +83,29 @@ function App() {
   // Camera 1 to camera 2 coordinate transform
   const M_inv = M.clone().invert()
   const cam1ToCam2 = Mp.clone().multiply(M_inv)
-  const Rt = new THREE.Matrix3().setFromMatrix4(cam1ToCam2)
-  const minusRtT = new THREE.Vector3().setFromMatrixColumn(cam1ToCam2, 3)
-
-  // Decomposed into R and T
-  const R = Rt.clone().transpose()
-  const T = minusRtT.clone().multiplyScalar(-1).applyMatrix3(R)
+  const R = new THREE.Matrix3().setFromMatrix4(cam1ToCam2)
+  const T = new THREE.Vector3().setFromMatrixColumn(cam1ToCam2, 3)
   const T_x = crossProductMatrixHelper(T)
 
-  // Essential and Fundamental Matrices
-  const Kit = K.clone().invert().transpose()
-  const Kpi = Kp.clone().invert()
+  // Essential Matrix (c1 to c2)
   const E = T_x.clone().multiply(R)
-  const F = Kit.clone().multiply(E).multiply(Kpi)
+
+  // Fundamental Matrix (c1 to c2)
+  const Ki = K.clone().invert()
+  const Kpit = Kp.clone().invert().transpose()
+  const F = Kpit.clone().multiply(E).multiply(Ki)
+
+  // Fundamental Matrix (c2 to c1)
   const Ft = F.clone().transpose()
 
   // Lines
-  const l = xp.clone().applyMatrix3(F)
+  const l = xp.clone().applyMatrix3(Ft)
   const lFunction = (x: number): number => (-l.z - l.x * x) / l.y
-  const lp = x.clone().applyMatrix3(Ft)
+  const lp = x.clone().applyMatrix3(F)
   const lpFunction = (x: number): number => (-lp.z - lp.x * x) / lp.y
+
+  const test = l.dot(x)
+  const testp = lp.dot(xp)
 
   // States
   const scrollRef = useRef<any>()
@@ -124,6 +127,13 @@ function App() {
   const [sceneCommand, setSceneCommand] = useState<SceneCommand>(SceneCommand.nothing)
   const [c1Command, setC1Command] = useState<CameraCommand>(CameraCommand.nothing)
   const [c2Command, setC2Command] = useState<CameraCommand>(CameraCommand.nothing)
+
+  // Phrasing
+  const [generalPhrasing, setGeneralPhrasing] = useState<boolean>(false)
+  const sourcePhraseA = generalPhrasing ? 'a source' : "c1's"
+  const sourcePhrase = generalPhrasing ? 'the source' : "c1's"
+  const destinationPhraseA = generalPhrasing ? 'a destination' : "c2's"
+  const destinationPhrase = generalPhrasing ? 'the destination' : "c2's"
 
   return (
     <div className="App">
@@ -235,7 +245,7 @@ function App() {
                 </p>
                 <p>
                   {'Hint:  '}
-                  {"it's not <tx, ty, tz>."}
+                  {"it's not <tx,\u00a0ty,\u00a0tz>."}
                 </p>
               </blockquote>
             </div>
@@ -530,8 +540,8 @@ function App() {
               </p>
             </div>
 
-            <h2 id="camera-to-camera-transforms-prelude" className="title-text">
-              {'Camera-to-Camera Transforms (Prelude)'}
+            <h2 id="camera-space-to-camera-space-transforms-prelude" className="title-text">
+              {'Camera-Space to Camera-Space Transforms (Prelude)'}
             </h2>
 
             <div className="body-text">
@@ -628,19 +638,19 @@ function App() {
 
             <div className="body-text">
               <p>
-                {'For the first time, we\'re going to give you an answer to a "think" question: '}
-                {'the right-most column represents the '}
+                {'Just this once, we\'re going to give you the answer to a "think" question: '}
+                {'the right-most column represents the position of the '}
                 <strong>{'world-space origin'}</strong>
                 {' in '}
                 <strong>{'camera space'}</strong>
                 {'.'}
               </p>
               <p>
-                {"In fact, that's the whole "}
+                {'In fact, that relates to the whole '}
                 <em>{'point'}</em>
                 {' of the '}
                 <strong>{'extrinsic matrix'}</strong>
-                {'! It takes a '}
+                {': it takes a '}
                 <strong>{'3D'}</strong>
                 {' point in world space and maps it to a corresponding '}
                 <strong>{'3D'}</strong>
@@ -819,163 +829,568 @@ function App() {
 
             <div className="body-text">
               <p>
-                {"Next, let's break the above matrix apart. We define these parts as "}
-                {' weird math expressions, but it will make more sense later!'}
+                {'Like all coordinate transforms (mappings from one "space" to another), '}
+                {'the above matrix is really just a rotation combined with a translation. '}
+              </p>
+              <p>{"Let's try to break it apart, since we'll need the pieces later:"}</p>
+            </div>
+
+            <MatrixEquation>
+              <span>{'Break'}</span>
+              <Matrix44Display label={'c1 space to c2 space'} matrix={cam1ToCam2} />
+              <span>{'into'}</span>
+              <Matrix33Display label={'some kind of rotation, R'} matrix={R} className="brown all" />
+              <span>{'and'}</span>
+              <Vector3Display label={'some kind of translation, T'} vector={T} />
+            </MatrixEquation>
+
+            <div className="body-text">
+              <p className="brown">
+                <em>{'What does the thing on the left, R, mean?'}</em>
+              </p>
+              <p>
+                {'We can find out by giving both cameras the same position, but different '}
+                {'rotations (you may have to click a few times):'}
+              </p>
+              <p>
+                <button
+                  className="control-button"
+                  onClick={() => setC1Command(CameraCommand.setPositionToMatchC2)}>
+                  {'Translate c1 to match c2'}
+                </button>{' '}
+                <button
+                  className="control-button"
+                  onClick={() => setC1Command(CameraCommand.setRotationToIdentity)}>
+                  {"Set c1's Rotation To Identity"}
+                </button>{' '}
+                <button className="control-button" onClick={() => setC1Command(CameraCommand.resetTransforms)}>
+                  {'Reset c1'}
+                </button>
               </p>
             </div>
 
             <MatrixEquation>
-              <span>{' break '}</span>
-              <Matrix44Display label={'camera 1 space to camera 2 space'} matrix={cam1ToCam2} />
-              <span>{' into '}</span>
-              <Matrix33Display label={'left side, defined as R\u1D40'} matrix={R} />
-              <span>{' and '}</span>
-              <Vector3Display label={'right side, defined as -(R\u1D40 * T)'} vector={minusRtT} />
+              <span>{'Remember these guys? '}</span>
+              <Matrix34Display label={"camera 1's extrinsic matrix, M"} matrix={M} className="brown left" />
+              <span>{'and'}</span>
+              <Matrix34Display label={"camera 2's extrinsic matrix, M'"} matrix={Mp} className="brown left" />
+            </MatrixEquation>
+
+            <div className="body-text">
+              <p>
+                {"Observe that R is equal to the rotation part of M' when M has no rotation! "}
+                {'From this, we might guess that R is '}
+                <span className="brown">
+                  {"a rotation which takes c1's direction and rotates it to match c2's"}
+                </span>
+                {". Let's give it a proper label:"}
+              </p>
+            </div>
+
+            <MatrixEquation>
+              <span>{'Break'}</span>
+              <Matrix44Display label={'c1 space to c2 space'} matrix={cam1ToCam2} />
+              <span>{'into'}</span>
+              <Matrix33Display label={'c1 space to c2 space rotation, R'} matrix={R} className="brown label" />
+              <span>{'and'}</span>
+              <Vector3Display label={'some kind of translation, T'} vector={T} className="purple all" />
+            </MatrixEquation>
+
+            <div className="body-text">
+              <p className="purple">
+                <em>{'Now, what does the thing on the right, T, mean?'}</em>
+              </p>
+              <p>
+                {'To figure this one out, '}
+                <strong>{'note'}</strong>
+                {" T's value. Then, rotate c1:"}
+              </p>
+              <p>
+                <button
+                  className="control-button"
+                  onClick={() => setC1Command(CameraCommand.setRotationToMatchC2)}>
+                  {'Rotate c1 to match c2'}
+                </button>{' '}
+                <button
+                  className="control-button"
+                  onClick={() => setC1Command(CameraCommand.setPositionToMatchC2)}>
+                  {'Translate c1 to match c2'}
+                </button>
+              </p>
+              <p>
+                {'Did T change when you rotated c1? (Probably not!). '}
+                {'Reset, and this time, try rotating c2 instead:'}
+              </p>
+              <p>
+                <button className="control-button" onClick={() => setC1Command(CameraCommand.resetTransforms)}>
+                  {'Reset c1'}
+                </button>{' '}
+                <button className="control-button" onClick={() => setC2Command(CameraCommand.resetTransforms)}>
+                  {'Reset c2'}
+                </button>
+              </p>
+              <p>
+                <button
+                  className="control-button"
+                  onClick={() => setC2Command(CameraCommand.setRotationToMatchC1)}>
+                  {'Rotate c2 to match c1'}
+                </button>{' '}
+                <button
+                  className="control-button"
+                  onClick={() => setC1Command(CameraCommand.setPositionToMatchC2)}>
+                  {'Translate c1 to match c2'}
+                </button>
+              </p>
+              <p>{'Did T change when you rotated c2? (Probably!).'}</p>
+              <p>
+                {"As you've probably already guessed, T is "}
+                <span className="purple">{'a translation which takes c1 and moves it to c2. '}</span>
+                {"However, you might've also caught on to something more subtle: "}
+                <em className="purple">{"T is defined in camera 2's space!"}</em>
+              </p>
+              <p>{'We can now give T a proper label, too:'}</p>
+            </div>
+
+            <MatrixEquation>
+              <span>{'Break'}</span>
+              <Matrix44Display label={'c1 space to c2 space'} matrix={cam1ToCam2} />
+              <span>{'into'}</span>
+              <Matrix33Display label={'c1 space to c2 space rotation, R'} matrix={R} className="brown all label" />
+              <span>{'and'}</span>
+              <Vector3Display
+                label={'c1 space to c2 space translation (in c2 space), T'}
+                vector={T}
+                className="purple all label"
+              />
+            </MatrixEquation>
+
+            <h2 id="uh-what-just-happened" className="title-text">
+              {'Uh, What Just Happened?'}
+            </h2>
+
+            <div className="body-text">
+              <p>
+                {'We just figured out that, given a transform which maps 3D coordinates in '}
+                <strong>{sourcePhraseA}</strong>
+                {' space to 3D coordinates in '}
+                <strong>{destinationPhraseA}</strong>
+                {' space, we can break it into understandable pieces. '}
+              </p>
+              <p>
+                {'Specifically, we can extract a '}
+                <span className="brown">
+                  {'rotation from '}
+                  <strong>{sourcePhrase}</strong>
+                  {' space to '}
+                  <strong>{destinationPhrase}</strong>
+                  {' space, R'}
+                </span>
+                {', and a '}
+                <span className="purple">
+                  {'translation from '}
+                  <strong>{sourcePhrase}</strong>
+                  {' space to '}
+                  <strong>{destinationPhrase}</strong>
+                  {' space, in '}
+                  <strong>{destinationPhrase}</strong>
+                  {' space, T'}
+                </span>
+                {'.'}
+              </p>
+              <p>
+                <button className="control-button" onClick={() => setGeneralPhrasing((prev) => !prev)}>
+                  {'Say that again, but more ' + (generalPhrasing ? 'specifically' : 'generally')}
+                </button>
+              </p>
+              <p>
+                {"If you're lost, don't worry, it took "}
+                <em>{'us'}</em>
+                {' >20h to figure this out 😅. '}
+                {"The good news, though, is that we're on the home stretch!"}
+              </p>
+            </div>
+
+            <h2 id="the-essential-matrix" className="title-text">
+              {'The Essential Matrix'}
+            </h2>
+
+            <div className="body-text">
+              <p>
+                {'As a matter of fact, once you have '}
+                <strong className="brown">{'R'}</strong>
+                {' and '}
+                <strong className="purple">{'T'}</strong>
+                {', we can make the '}
+                <strong>{'essential matrix'}</strong>
+                {' just by following a simple recipe:'}
+              </p>
+            </div>
+
+            <MatrixEquation>
+              <span>{'First, convert T into its "cross-product matrix form": '}</span>
+              <Vector3Display label={'T'} vector={T} className="purple all label" />
+              <span>{'→'}</span>
+              <Matrix33Display label={'T_x'} matrix={T_x} className="purple all label" />
+            </MatrixEquation>
+
+            <MatrixEquation>
+              <span>{'Then multiply!: '}</span>
+              <Matrix33Display label={'T_x'} matrix={T_x} className="purple all label" />
+              <span>{'*'}</span>
+              <Matrix33Display label={'R'} matrix={R} className="brown all label" />
+              <span className="big">{'='}</span>
+              <Matrix33Display label={'E'} matrix={E} />
+            </MatrixEquation>
+
+            <div className="body-text">
+              <p>
+                {"Great! Let's recap:"}
+                <br />
+                {"- We took M and M'"}
+                <br />
+                {'- Calculated a c1 space to c2 space transform'}
+                <br />
+                {'- Broke it apart to get R and T'}
+                <br />
+                {'- And finally calculated our essential matrix'}
+              </p>
+              <p>{"We're done here, right?"}</p>
+              <p>{'Right?'}</p>
+            </div>
+
+            <h2 id="the-fundamental-matrix" className="title-text">
+              {'The Fundamental Matrix'}
+            </h2>
+
+            <div className="body-text">
+              <p>{"There's good news and bad news."}</p>
+              <p>
+                {"The bad news is that we haven't considered our "}
+                <strong>{"intrinsic matrices, K and K'"}</strong>
+                {'. Since all we have are normalized image coordinates, we need to '}
+                {'"un-normalize" them, undoing the last multiplication-by-K in the '}
+                {'projection equation (repeated here):'}
+              </p>
+            </div>
+
+            <MatrixEquation>
+              <Matrix33Display label={'intrinsic matrix, K'} matrix={K} />
+              <span>{'*'}</span>
+              <Matrix34Display label={'extrinsic matrix, M'} matrix={M} />
+              <span>{'*'}</span>
+              <Vector4Display label={'world coord, X'} vector={X} />
+              <span className="big">{'='}</span>
+              <Vector3Display label={'result'} vector={result} />
+              <span className="big">{'='}</span>
+              <span className="limit-dp">{limitDpHelper(result.z)}</span>
+              <Vector3Display label={'image coord, x'} vector={x} className="blue" />
+            </MatrixEquation>
+
+            <div className="body-text">
+              <p>
+                {'We '}
+                <em>{'could'}</em>
+                {' do this for every normalized image coordinate we use. However, that would be a pain. '}
+              </p>
+              <p>
+                {'Instead, we can "sandwich" the essential matrix with the '}
+                <strong>{'inverses'}</strong>
+                {' of the intrinsic matrices, to make a '}
+                <strong>{'fundamental matrix'}</strong>
+                {'.'}
+              </p>
+            </div>
+
+            <MatrixEquation>
+              <Matrix33Display label={"transpose of the inverse of K', aka K'\u207B\u1D40"} matrix={Kpit} />
+              <span>{'*'}</span>
+              <Matrix33Display label={'E'} matrix={E} />
+              <span>{'*'}</span>
+              <Matrix33Display label={'the inverse of K, aka K\u207B\u00B9'} matrix={Ki} />
+              <span className="big">{'='}</span>
+              <Matrix33Display label={'F'} matrix={F} />
+            </MatrixEquation>
+
+            <div className="body-text">
+              <blockquote>
+                <p>
+                  {
+                    "Aside: we just skipped over that, but note the placements of K and K'. Back when we calculated "
+                  }
+                  <strong>{'c1 space to c2 space'}</strong>
+                  {', we assumed a certain "direction" in our transform, which affected R and T, and thus E.'}
+                </p>
+                <p>
+                  {'Since '}
+                  <strong>{"c1's"}</strong>
+                  {' space is the "'}
+                  <strong>{'input'}</strong>
+                  {'", we should apply our E to that; '}
+                  {"therefore, c1's intrinsic matrix K (rather, its inverse) must be on the "}
+                  <strong>{'right'}</strong>
+                  {' side. '}
+                </p>
+                <p>
+                  {'Conversely, '}
+                  <strong>{"c2's"}</strong>
+                  {" intrinsic matrix K' (again, its inverse, then transpose, because of "}
+                  {'matrix multiplication rules) must be on the '}
+                  <strong>{'left'}</strong>
+                  {' side.'}
+                </p>
+              </blockquote>
+            </div>
+
+            <div className="body-text">
+              <p>
+                {'We now have our '}
+                <strong>{'fundamental matrix'}</strong>
+                {"! Let's test it out :)"}
+              </p>
+            </div>
+
+            <h2 id="epipolar-lines" className="title-text">
+              {'Epipolar Lines'}
+            </h2>
+
+            <div className="body-text">
+              <p>
+                {"We've seen "}
+                <a href="#projection-recap">
+                  {'matrices that map '}
+                  <em>{'3D world coordinates'}</em>
+                  {' to '}
+                  <em>{'2D image coordinates'}</em>
+                </a>
+                {'.'}
+              </p>
+              <p>
+                {"We've also seen "}
+                <a href="#camera-space-to-camera-space-transforms">
+                  {'matrices that map '}
+                  <em>{'3D coordinates in one space'}</em>
+                  {' to '}
+                  <em>{'3D coordinates in a different space'}</em>
+                </a>
+                {'.'}
+              </p>
+              <p>
+                {'Compared to those, the essential and fundamental matrices are actually '}
+                {'pretty unique: they map '}
+                <strong>{"points on one camera's image plane"}</strong>
+                {' to '}
+                <strong>
+                  <em>{'lines'}</em>
+                  {" on another camera's image plane!"}
+                </strong>
+              </p>
+              <p>
+                {'These lines is known as '}
+                <strong>{'epipolar lines'}</strong>
+                {', and they represent the places where a 2D point (on '}
+                <em>{'our'}</em>
+                {" camera's image plane) corresponding to a 2D point (on "}
+                <em>{'the other'}</em>
+                {" camera's image plane) can be found."}
+              </p>
+              <p>
+                {'For a different perspective, an epipolar line can also be considered to be the '}
+                <strong>{'projection'}</strong>
+                {" of the line going through the other camera's center and the object, onto our "}
+                {'camera\'s image plane. Try enabling these "lines of sight" below:'}
+              </p>
+              <p>
+                <button
+                  className="control-button"
+                  onClick={() =>
+                    setOtherThingsToShow((prev) => ({
+                      ...prev,
+                      epipolarLines: !prev.epipolarLines,
+                    }))
+                  }>
+                  {otherThingsToShow.epipolarLines
+                    ? 'Hide Lines From Cameras To Object'
+                    : 'Show Lines From Cameras To Object'}
+                </button>
+              </p>
+            </div>
+
+            <div className="body-text">
+              <blockquote>
+                <p>
+                  {'Think:  '}
+                  {'why does the "line of sight" contain all the places where the corresponding point should '}
+                  {'be found on our image plane?'}
+                </p>
+                <p>
+                  {'Hint:  '}
+                  {'consider that every point along that "line of sight" will look the same to the other camera.'}
+                </p>
+              </blockquote>
+            </div>
+
+            <div className="body-text">
+              <p>{'Do also enable the point predictions below, for some nice color-coding:'}</p>
+              <p>
+                <button
+                  className="control-button"
+                  onClick={() =>
+                    setOtherThingsToShow((prev) => ({ ...prev, c1PointPrediction: !prev.c1PointPrediction }))
+                  }>
+                  {otherThingsToShow.c1PointPrediction
+                    ? "Hide c1's Point Prediction"
+                    : "Show c1's Point Prediction"}
+                </button>{' '}
+                <button
+                  className="control-button"
+                  onClick={() =>
+                    setOtherThingsToShow((prev) => ({ ...prev, c2PointPrediction: !prev.c2PointPrediction }))
+                  }>
+                  {otherThingsToShow.c1PointPrediction
+                    ? "Hide c2's Point Prediction"
+                    : "Show c2's Point Prediction"}
+                </button>
+              </p>
+              <p>
+                {"To get an epipolar line, left-multiply the point on the c1's image plane by F, "}
+                {"or c2's by F\u1D40:"}
+              </p>
+            </div>
+
+            <MatrixEquation>
+              <Matrix33Display label={'F'} matrix={F} />
+              <span>{'*'}</span>
+              <Vector3Display label={'x'} vector={x} className="blue" />
+              <span className="big">{'='}</span>
+              <Vector3Display label={"l'"} vector={lp} className="blue all" />
             </MatrixEquation>
 
             <div className="matrix-equation">
-              <span>{'From R\u1D40 and -(R\u1D40 * T), we can then get '}</span>
-              <Matrix33Display label={'R'} matrix={R} />
-              <span>{' and '}</span>
-              <Vector3Display label={'T'} vector={T} />
-            </div>
-
-            <div className="body-text">
-              <p>
-                {'Think:  '}
-                {'what exactly do '}
-                <strong>{'R'}</strong>
-                {' and '}
-                <strong>{'T'}</strong>
-                {" represent, and what's up with the -(R\u1D40 * T) on the right side?"}
-              </p>
-              <p>
-                <strong>{'Explanation (click to expand):'}</strong>
-              </p>
-              <p>
-                {'Imagine both cameras shared the same world position, but differed in rotation. Then, '}
-                {"R\u1D40 would take camera 1's (c1's) direction and rotate it to match camera 2's (c2's). "}
-                {'Thus, R\u1D40 is '}
-                <strong>{'the rotation from c1 to c2'}</strong>
-                {', and since transposition is the same as inversion for rotation matrices, R is '}
-                <strong>{'the rotation from c2 to c1'}</strong>
-                {'.'}
-              </p>
-              <p>
-                {'Now, imagine they have different world positions as well. '}
-                {'R\u1D40 again rotates c1 to be parallel to c2. '}
-                {'But now, to move c1 to perfectly match c2, '}
-                {'we need to translate it by some vector '}
-                <em>{"in c2's space"}</em>
-                {': this is -(R\u1D40 * T), '}
-                <strong>{"the translation from c1 to c2, in c2's space"}</strong>
-                {'.'}
-              </p>
-              <p>
-                {'On the flip side, T is '}
-                <strong>{"the translation from c2 to c1, in c1's space"}</strong>
-                {'.'}
-              </p>
-            </div>
-
-            {/* <div className="matrix-equation">
-              <span style={{ top: 0 }}>{'(ಥ﹏ಥ)'}</span>
-            </div> */}
-
-            <div className="body-text">
-              <p>
-                <strong>{'Whew!'}</strong>
-                {' That was a lot to get through!'}
-              </p>
-              <p>{"Don't worry, it took me >20h to figure this out."}</p>
-              <p>
-                {'But now, '}
-                <strong>{'given R and T'}</strong>
-                {', we can finally make the '}
-                <strong>{'essential matrix'}</strong>
-                {'! Just follow the recipe:'}
-              </p>
-            </div>
-
-            <div className="matrix-equation">
-              <span>{'First, convert T into its cross-product matrix form: '}</span>
-              <Vector3Display label={'T'} vector={T} />
-              <span>{'=>'}</span>
-              <Matrix33Display label={'T_x'} matrix={T_x} />
-            </div>
-            <div className="matrix-equation">
-              <span>{'Then multiply!: '}</span>
-              <Matrix33Display label={'T_x'} matrix={T_x} />
-              <span>{'*'}</span>
-              <Matrix33Display label={'R'} matrix={R} />
-              <span className="big">{'='}</span>
-              <Matrix33Display label={'E'} matrix={E} />
-            </div>
-
-            <div className="body-text">
-              <p>
-                {'The essential matrix is great for '}
-                <strong>{'canonical cameras'}</strong>
-                {', with K = identity, but we have non-canonical cameras here. So, we must instead get the '}
-                <strong>{'fundamental matrix'}</strong>
-                {':'}
-              </p>
-            </div>
-
-            <div className="matrix-equation">
-              <Matrix33Display label={'K\u207B\u1D40'} matrix={Kit} />
-              <span>{'*'}</span>
-              <Matrix33Display label={'E'} matrix={E} />
-              <span>{'*'}</span>
-              <Matrix33Display label={"K'\u207B\u00B9"} matrix={Kpi} />
-              <span className="big">{'='}</span>
-              <Matrix33Display label={'F'} matrix={F} />
-            </div>
-
-            <div className="body-text">
-              <p>
-                {'And with that, we can finally make '}
-                <strong>{'epipolar lines'}</strong>
-                {'! '}
-                {"Those are what I'm using to position the circles on the sides of the images above."}
-              </p>
-            </div>
-
-            <div className="matrix-equation">
-              <Matrix33Display label={'F'} matrix={F} />
+              <Matrix33Display label={'F\u1D40'} matrix={Ft} />
               <span>{'*'}</span>
               <Vector3Display label={"x'"} vector={xp} className="green" />
               <span className="big">{'='}</span>
               <Vector3Display label={'l'} vector={l} className="green all" />
             </div>
 
-            <div className="matrix-equation">
-              <Matrix33Display label={'F\u1D40'} matrix={Ft} />
+            <div className="body-text">
+              <p>{'The lines are represented in vector form, but they can be read:'}</p>
+              <p>
+                {"l': "}
+                <span className="blue">{limitDpHelper(lp.x)}</span>
+                {' x + '}
+                <span className="blue">{limitDpHelper(lp.y)}</span>
+                {' y + '}
+                <span className="blue">{limitDpHelper(lp.z)}</span>
+                {' = 0'}
+              </p>
+              <p>
+                {'l: '}
+                <span className="green">{limitDpHelper(l.x)}</span>
+                {' x + '}
+                <span className="green">{limitDpHelper(l.y)}</span>
+                {' y + '}
+                <span className="green">{limitDpHelper(l.z)}</span>
+                {' = 0'}
+              </p>
+              <p>
+                {'Here, we have a crude test (it only shows the y-intercepts on the left and right borders) '}
+                {'which checks if our calculated epipolar lines match up exactly with the "lines of sight":'}
+              </p>
+              <p>
+                <button
+                  className="control-button"
+                  onClick={() =>
+                    setOtherThingsToShow((prev) => ({
+                      ...prev,
+                      epipolarLinePredictions: !prev.epipolarLinePredictions,
+                    }))
+                  }>
+                  {otherThingsToShow.epipolarLinePredictions
+                    ? 'Hide Epipolar Line Predictions'
+                    : 'Show Epipolar Line Predictions'}
+                </button>
+              </p>
+            </div>
+
+            <h2 id="epipolar-constraint" className="title-text">
+              {'Epipolar Constraint'}
+            </h2>
+
+            <div className="body-text">
+              <p>{'Now that we have our epipolar lines, why stop there?'}</p>
+              <p>
+                {'After all, the dot product of a line and a point on that line should return zero. '}
+                {'So, if we have a '}
+                <strong>{'candidate point correspondence'}</strong>
+                {' we would like to check, we can use that to our advantage.'}
+              </p>
+              <p>
+                {'This is known as the '}
+                <strong>{'epipolar constraint'}</strong>
+                {', and it usually looks something like this:'}
+              </p>
+            </div>
+
+            <MatrixEquation initialCollapse={true}>
+              <Vector3Display label={"x'"} vector={xp} className="green" />
+              <span>{'dot'}</span>
+              <Matrix33Display label={'F'} matrix={F} />
               <span>{'*'}</span>
               <Vector3Display label={'x'} vector={x} className="blue" />
               <span className="big">{'='}</span>
-              <Vector3Display label={"l'"} vector={lp} className="blue all" />
+              <Vector3Display label={"x'"} vector={xp} className="green" />
+              <span>{'dot'}</span>
+              <Vector3Display label={"l'"} vector={lp} className="blue" />
+              <span className="big">{'='}</span>
+              <span>{limitDpHelper(testp)}</span>
+            </MatrixEquation>
+
+            <div className="body-text">
+              <p>{'Or like this:'}</p>
             </div>
+
+            <MatrixEquation initialCollapse={true}>
+              <Vector3Display label={'x'} vector={x} className="blue" />
+              <span>{'dot'}</span>
+              <Matrix33Display label={'F\u1D40'} matrix={Ft} />
+              <span>{'*'}</span>
+              <Vector3Display label={"x'"} vector={xp} className="green" />
+              <span className="big">{'='}</span>
+              <Vector3Display label={'x'} vector={x} className="blue" />
+              <span>{'dot'}</span>
+              <Vector3Display label={'l'} vector={l} className="green" />
+              <span className="big">{'='}</span>
+              <span>{limitDpHelper(test)}</span>
+            </MatrixEquation>
+
+            <h2 id="conclusion" className="title-text">
+              {'Conclusion'}
+            </h2>
 
             <div className="body-text">
               <p>
                 <strong>{'Congratulations!'}</strong>
-                <br />
-                {'You made it through the most difficult concept in CSCI 1430 :)'}
               </p>
+              <p>{'You made it through the most challenging concept in CSCI 1430 :)'}</p>
               <p>
-                {'As you saw above, we used '}
+                {'In this workshop, we used '}
                 <strong>{'known camera matrices'}</strong>
-                {' to get a fundamental matrix. This is just '}
+                {' to get a fundamental matrix. Incidentally, this is just '}
                 <strong>{'one'}</strong>
-                {' way to do it, and probably the harder one.'}
+                {' way to do it, and probably the harder one!'}
               </p>
               <p>
                 {'In HW3, you will implement a different way, one which involves '}
                 {'using point correspondences to '}
                 <em>{'guess'}</em>
-                {' the fundamental matrix, instead. All the best!'}
+                {' the fundamental matrix, instead. You will probably use '}
+                <strong>{'linear least-squares regression'}</strong>
+                {' or '}
+                <strong>{'singular-value decomposition'}</strong>
+                {'.'}
               </p>
+              <p>{'All the best!'}</p>
             </div>
           </div>
         </div>

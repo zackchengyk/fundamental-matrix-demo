@@ -60,30 +60,36 @@
   }
 }
 
-.blue {
+@mixin col($color) {
   &.all .limit-dp {
-    color: $blue-light;
+    color: $color;
+  }
+  &.label .matrix-label {
+    color: $color;
+  }
+  &.left .limit-dp:nth-last-of-type(n + 4) {
+    color: $color;
   }
   &.last .limit-dp:nth-of-type(n + 10) {
-    color: $blue-light;
+    color: $color;
   }
-  &:not(.last) .limit-dp:nth-of-type(1),
-  &:not(.last) .limit-dp:nth-of-type(2) {
-    color: $blue-light;
+  &:not(.last, .label) .limit-dp:nth-of-type(1),
+  &:not(.last, .label) .limit-dp:nth-of-type(2) {
+    color: $color;
   }
 }
 
+.blue {
+  @include col($blue-light);
+}
 .green {
-  &.all .limit-dp {
-    color: $green-light;
-  }
-  &.last .limit-dp:nth-of-type(n + 10) {
-    color: $green-light;
-  }
-  &:not(.last) .limit-dp:nth-of-type(1),
-  &:not(.last) .limit-dp:nth-of-type(2) {
-    color: $green-light;
-  }
+  @include col($green-light);
+}
+.brown {
+  @include col($brown-light);
+}
+.purple {
+  @include col($purple-light);
 }
 
 .matrix {

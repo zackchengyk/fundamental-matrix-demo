@@ -10,7 +10,7 @@ export enum LookDirUpdateMode {
   slerpToLookAt,
 }
 
-const factor = 1 / 8
+const factor = 1 / 16
 const dummyVector = new THREE.Vector3()
 const dummyMatrix = new THREE.Matrix4()
 const dummyQuaternion = new THREE.Quaternion()

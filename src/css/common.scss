@@ -48,6 +48,9 @@ $blue-dark: #003c75;
 $blue-dark-dark: #002a5b;
 $blue-black: #002557;
 
+$purple-light: rgb(210, 140, 216);
+$brown-light: rgb(255, 162, 56);
+
 $green-white: #81ffb4;
 $green-light-light: #67cd94;
 $green-light: #5bb585;
@@ -177,12 +180,21 @@ body {
     margin-bottom: $text-vert-spacing;
   }
 
-  .blue {
+  .blue,
+  .blue * {
     color: $blue-light !important;
   }
-
-  .green {
+  .green,
+  .green * {
     color: $green-light !important;
+  }
+  .brown,
+  .brown * {
+    color: $brown-light !important;
+  }
+  .purple,
+  .purple * {
+    color: $purple-light !important;
   }
 
   a {
