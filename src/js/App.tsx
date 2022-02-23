@@ -315,11 +315,11 @@ function App() {
               <p>
                 {"If you've done the written component of HW3, you'd already have "}
                 <strong>{'projected'}</strong>
-                {' points in world space onto an image plane. '}
+                {' 3D points in world space onto a 2D image plane. '}
                 {"If not, that's okay! We'll briefly recap the basic principles here :)"}
               </p>
               <p>
-                {"Using camera 1 as an example, let's project the point located at "}
+                {"Using camera 1 as an example, let's project the 3D point located at "}
                 <strong>
                   {`<${limitDpHelper(X.x)},\u00a0${limitDpHelper(X.y)},\u00a0${limitDpHelper(X.z)}>`}
                 </strong>
@@ -353,8 +353,8 @@ function App() {
                 {" give the point's normalized 2D image coordinates."}
               </p>
               <p>
-                {"Now that we've calculated where the point should be, let's see if our prediction is correct. "}
-                {'Click the button below to show a '}
+                {"Now that we've calculated where the point should appear on the image plane, "}
+                {"let's see if our prediction is correct. Click the button below to show a "}
                 <strong className="blue">{'marker'}</strong>
                 {' on the image: '}
               </p>
@@ -373,7 +373,7 @@ function App() {
 
             <div className="body-text">
               <p>
-                {'Try moving the camera around again! Or, click the button below to make the point '}
+                {'Try moving the camera around again! Or, click the button below to make the 3D point '}
                 {isMoving ? 'stop moving' : 'start moving'}
                 {':'}
               </p>
@@ -429,7 +429,7 @@ function App() {
 
             <div className="body-text">
               <p>
-                {'Just like we did with camera 1, we can project the point located at '}
+                {'Just like we did with camera 1, we can project the 3D point located at '}
                 <strong>{`<${limitDpHelper(X.x)},\u00a0${limitDpHelper(X.y)},\u00a0${limitDpHelper(
                   X.z
                 )}>`}</strong>
@@ -581,7 +581,7 @@ function App() {
               </p>
               <p>
                 {"Here's c1's projection equation again, but only its first step (M\u00a0*\u00a0X). "}
-                {'Here are also some controls for the point:'}
+                {'Here are also some controls for the 3D world point:'}
               </p>
               <p>
                 <button
@@ -636,11 +636,15 @@ function App() {
                 {'.'}
               </p>
               <p>
-                {"In fact, that's the whole point of the "}
+                {"In fact, that's the whole "}
+                <em>{'point'}</em>
+                {' of the '}
                 <strong>{'extrinsic matrix'}</strong>
-                {'! It takes '}
-                <em>{'any'}</em>
-                {' point in world space and maps it to a corresponding point '}
+                {'! It takes a '}
+                <strong>{'3D'}</strong>
+                {' point in world space and maps it to a corresponding '}
+                <strong>{'3D'}</strong>
+                {' point '}
                 <strong>{'in camera space'}</strong>
                 {'.'}
               </p>
@@ -661,19 +665,18 @@ function App() {
                     <strong>{'projection'}</strong>
                   </em>
                   {' is invertible! Recall that you divide '}
-                  {'by z, and then toss that value away. That information is gone, so z could have been anything'}
-                </p>
-                <p>
-                  {'Think:  '}
-                  {'if you fix just 2 of 3 dimensions, what kind of shape do you get?'}
+                  {'by z, and then toss that value away. That information is gone, so z could have been '}
+                  {'anything: this corresponds to any location along the '}
+                  <strong>{'ray'}</strong>
+                  {' going from the camera to the point.'}
                 </p>
               </blockquote>
             </div>
 
             <div className="body-text">
               <p>
-                {'This was all you need to know about coordinate spaces for CSCI 1430. '}
-                {"We're now ready to talk about "}
+                {'This was all you needed to know about coordinate spaces for CSCI 1430. '}
+                {"Now, we're ready to talk about "}
                 <strong>{'camera-space to camera-space transforms'}</strong>
                 {'.'}
               </p>
@@ -776,7 +779,7 @@ function App() {
                 {"As always, you're "}
                 <em>{'highly'}</em>
                 {' encouraged to mess around with the positions of c1 and c2'}
-                {', and see how the above matrix changes!'}
+                {'. Watch how the above matrix changes!'}
               </p>
               <p>
                 <button
