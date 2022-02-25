@@ -234,6 +234,7 @@ function App() {
   return (
     <div className="App" ref={appRef} onMouseUp={endDrag} onMouseLeave={endDrag} onMouseMove={onDrag}>
       <DemoWindow
+        // @ts-ignore
         ref={multiDragRef}
         startDragTop={startDragTop}
         startDragBot={startDragBot}

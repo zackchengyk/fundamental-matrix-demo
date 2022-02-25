@@ -181,6 +181,7 @@ const DemoWindow = React.forwardRef<MultiDragRef, DemoWindowProps>(
       c3Command,
       setC3Command,
     },
+    // @ts-ignore
     { demoWindowRef, topRef, botRef }
   ) => {
     // Refs
