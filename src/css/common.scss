@@ -175,7 +175,14 @@ body {
     background-color: $blockquote-background-color;
   }
 
+  > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25ch 1ch;
+  }
+
   > blockquote:not(:last-child),
+  div:not(:last-child),
   p:not(:last-child) {
     margin-bottom: $text-vert-spacing;
   }
@@ -226,6 +233,8 @@ body {
 .control-button {
   border: $line;
   padding: 0.5ch 1ch;
+
+  white-space: nowrap;
 
   cursor: pointer;
   background-color: $panel-color;

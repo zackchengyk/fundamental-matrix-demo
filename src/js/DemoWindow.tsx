@@ -133,6 +133,8 @@ type DemoWindowProps = {
   setC1Command: React.Dispatch<React.SetStateAction<CameraCommand>>
   c2Command: CameraCommand
   setC2Command: React.Dispatch<React.SetStateAction<CameraCommand>>
+  c3Command: CameraCommand
+  setC3Command: React.Dispatch<React.SetStateAction<CameraCommand>>
 }
 
 function DemoWindow({
@@ -164,6 +166,8 @@ function DemoWindow({
   setC1Command,
   c2Command,
   setC2Command,
+  c3Command,
+  setC3Command,
 }: DemoWindowProps) {
   // Refs
   const demoRef = useRef<DemoType>()
@@ -198,6 +202,13 @@ function DemoWindow({
     dispatchCameraCommand(demoRef.current, 1, c2Command)
     setC2Command(CameraCommand.nothing)
   }, [c2Command])
+
+  // Camera 3
+  useEffect(() => {
+    if (c3Command === CameraCommand.nothing || demoRef.current == null) return
+    dispatchCameraCommand(demoRef.current, 2, c3Command)
+    setC3Command(CameraCommand.nothing)
+  }, [c3Command])
 
   // Moving
   useEffect(() => {
@@ -269,7 +280,7 @@ function DemoWindow({
               <Target x={1} y={lFunction(1)} className="green" />
             </>
           ) : null}
-          <div className="container-label">{'Camera 1 (c1)'}</div>
+          <div className="container-label">{'View From Camera 1 (c1)'}</div>
         </div>
       </div>
       <div>
@@ -282,13 +293,13 @@ function DemoWindow({
               <Target x={1} y={lpFunction(1)} className="blue" />
             </>
           ) : null}
-          <div className="container-label">{'Camera 2 (c2)'}</div>
+          <div className="container-label">{'View From Camera 2 (c2)'}</div>
         </div>
       </div>
       <div>
         <div className="container" ref={container3Ref} style={showC3Display ? {} : hiddenStyle}>
           <canvas className="canvas" ref={canvas3Ref} />
-          <div className="container-label">{'Witness Camera'}</div>
+          <div className="container-label">{'View From Witness Camera'}</div>
         </div>
       </div>
     </div>

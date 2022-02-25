@@ -129,6 +129,7 @@ function App() {
   const [sceneCommand, setSceneCommand] = useState<SceneCommand>(SceneCommand.nothing)
   const [c1Command, setC1Command] = useState<CameraCommand>(CameraCommand.nothing)
   const [c2Command, setC2Command] = useState<CameraCommand>(CameraCommand.nothing)
+  const [c3Command, setC3Command] = useState<CameraCommand>(CameraCommand.nothing)
 
   // Phrasing
   const [generalPhrasing, setGeneralPhrasing] = useState<boolean>(false)
@@ -169,6 +170,8 @@ function App() {
           setC1Command,
           c2Command,
           setC2Command,
+          c3Command,
+          setC3Command,
         }}
       />
 
@@ -278,36 +281,37 @@ function App() {
             <div className="body-text">
               <p>
                 {'Move the camera, and see how its intrinsic and extrinsic matrices change. '}
-                {'You can drag with one finger to rotate, drag with two fingers to pan, '}
-                {'scroll to zoom, or click any of these buttons:'}
+                {'You can click and drag with the left mouse button to rotate, click and drag '}
+                {'with the right mouse button to pan, scroll to zoom, or click any of these '}
+                {" buttons (they're a bit finicky, so you might have to click more than once):"}
               </p>
-              <p>
+              <div>
                 <button
                   className="control-button"
                   onClick={() => setC1Command(CameraCommand.setRotationToIdentity)}>
                   {'Set Rotation To Identity'}
-                </button>{' '}
+                </button>
                 <button
                   className="control-button"
                   onClick={() => setC1Command(CameraCommand.setLookPositionToOrigin)}>
                   {'Look At Origin'}
-                </button>{' '}
+                </button>
                 <button className="control-button" onClick={() => setC1Command(CameraCommand.resetTransforms)}>
                   {'Reset'}
                 </button>
-              </p>
-              <p>
+              </div>
+              <div>
                 {'Standard views: '}
                 <button className="control-button" onClick={() => setC1Command(CameraCommand.useStandardViewX)}>
                   {'X Axis'}
-                </button>{' '}
+                </button>
                 <button className="control-button" onClick={() => setC1Command(CameraCommand.useStandardViewY)}>
                   {'Y Axis'}
-                </button>{' '}
+                </button>
                 <button className="control-button" onClick={() => setC1Command(CameraCommand.useStandardViewZ)}>
                   {'Z Axis'}
                 </button>
-              </p>
+              </div>
             </div>
 
             <div className="body-text">
@@ -325,7 +329,7 @@ function App() {
 
             <div className="body-text">
               <p>
-                {"If you've done the written component of HW3, you'd already have "}
+                {"If you've done part of the written component of HW3, you might already have "}
                 <strong>{'projected'}</strong>
                 {' 3D points in world space onto a 2D image plane. '}
                 {"If not, that's okay! We'll briefly recap the basic principles here :)"}
@@ -370,7 +374,7 @@ function App() {
                 <strong className="blue">{'marker'}</strong>
                 {' on the image: '}
               </p>
-              <p>
+              <div>
                 <button
                   className="control-button"
                   onClick={() =>
@@ -380,7 +384,7 @@ function App() {
                     ? "Hide Camera 1's Point Prediction"
                     : "Show Camera 1's Point Prediction"}
                 </button>
-              </p>
+              </div>
             </div>
 
             <div className="body-text">
@@ -389,11 +393,11 @@ function App() {
                 {isMoving ? 'stop moving' : 'start moving'}
                 {':'}
               </p>
-              <p>
+              <div>
                 <button className="control-button" onClick={() => setIsMoving((prev) => !prev)}>
                   {isMoving ? 'Stop Moving' : 'Start Moving'}
                 </button>
-              </p>
+              </div>
             </div>
 
             <div className="body-text">
@@ -463,7 +467,7 @@ function App() {
             </MatrixEquation>
 
             <div className="body-text">
-              <p>
+              <div>
                 <button
                   className="control-button"
                   onClick={() =>
@@ -473,38 +477,38 @@ function App() {
                     ? "Hide Camera 2's Point Prediction"
                     : "Show Camera 2's Point Prediction"}
                 </button>
-              </p>
+              </div>
               <p>{'And, of course, we can also move camera 2 around:'}</p>
             </div>
 
             <div className="body-text">
-              <p>
+              <div>
                 <button
                   className="control-button"
                   onClick={() => setC2Command(CameraCommand.setRotationToIdentity)}>
                   {'Set Rotation To Identity'}
-                </button>{' '}
+                </button>
                 <button
                   className="control-button"
                   onClick={() => setC2Command(CameraCommand.setLookPositionToOrigin)}>
                   {'Look At Origin'}
-                </button>{' '}
+                </button>
                 <button className="control-button" onClick={() => setC2Command(CameraCommand.resetTransforms)}>
                   {'Reset'}
                 </button>
-              </p>
-              <p>
+              </div>
+              <div>
                 {'Standard views: '}
                 <button className="control-button" onClick={() => setC2Command(CameraCommand.useStandardViewX)}>
                   {'X Axis'}
-                </button>{' '}
+                </button>
                 <button className="control-button" onClick={() => setC2Command(CameraCommand.useStandardViewY)}>
                   {'Y Axis'}
-                </button>{' '}
+                </button>
                 <button className="control-button" onClick={() => setC2Command(CameraCommand.useStandardViewZ)}>
                   {'Z Axis'}
                 </button>
-              </p>
+              </div>
             </div>
 
             <h2 id="stereo-camera-pair" className="title-text">
@@ -518,28 +522,34 @@ function App() {
                 {' camera. '}
               </p>
               <p>
-                {"This one's just for reference (we'll call it the "}
-                <strong>{'witness'}</strong>
-                {"), so we won't be using it in any calculations or anything."}
+                {"Don't worry, this one's just for reference (we'll call it the "}
+                <strong>{'witness camera'}</strong>
+                {"); we won't use it in any calculations or anything."}
               </p>
-              <p>{"Let's use it to take a look at what our cameras can see:"}</p>
-              <p>
+              <p>{"Instead, we'll use it to take a look at what our cameras can see:"}</p>
+              <div>
                 <button
                   className="control-button"
                   onClick={() => setOtherThingsToShow((prev) => ({ ...prev, c1Frustum: !prev.c1Frustum }))}>
                   {otherThingsToShow.c1Frustum ? "Hide Camera 1's Frustum" : "Show Camera 1's Frustum"}
-                </button>{' '}
+                </button>
                 <button
                   className="control-button"
                   onClick={() => setOtherThingsToShow((prev) => ({ ...prev, c2Frustum: !prev.c2Frustum }))}>
                   {otherThingsToShow.c2Frustum ? "Hide Camera 2's Frustum" : "Show Camera 2's Frustum"}
                 </button>
-              </p>
+              </div>
               <p>
                 {"(You don't have to know this for CSCI 1430, but a camera's "}
                 <strong>{'frustum'}</strong>
                 {' is the shape which contains the region of space the camera can see)'}
               </p>
+              <p>{"Before we move on, here's a reset button just in case:"}</p>
+              <div>
+                <button className="control-button" onClick={() => setC3Command(CameraCommand.resetTransforms)}>
+                  {'Reset Witness Camera'}
+                </button>
+              </div>
             </div>
 
             <h2 id="camera-space-to-camera-space-transforms-prelude" className="title-text">
@@ -595,7 +605,7 @@ function App() {
                 {"Here's c1's projection equation again, but only its first step (M\u00a0*\u00a0X). "}
                 {'Here are also some controls for the 3D world point:'}
               </p>
-              <p>
+              <div>
                 <button
                   className="control-button"
                   onClick={() => {
@@ -603,11 +613,39 @@ function App() {
                     setSceneCommand(SceneCommand.setPointToOrigin)
                   }}>
                   {'Set Point To Origin'}
-                </button>{' '}
+                </button>
                 <button className="control-button" onClick={() => setIsMoving((prev) => !prev)}>
                   {isMoving ? 'Stop Moving' : 'Start Moving'}
                 </button>
-              </p>
+              </div>
+              <p>{'...as well as for camera 1:'}</p>
+              <div>
+                <button
+                  className="control-button"
+                  onClick={() => setC1Command(CameraCommand.setRotationToIdentity)}>
+                  {"Set c1's Rotation To Identity"}
+                </button>
+                <button
+                  className="control-button"
+                  onClick={() => setC1Command(CameraCommand.setLookPositionToOrigin)}>
+                  {'Point c1 At Origin'}
+                </button>
+                <button className="control-button" onClick={() => setC1Command(CameraCommand.resetTransforms)}>
+                  {'Reset c1'}
+                </button>
+              </div>
+              <div>
+                {'Standard views: '}
+                <button className="control-button" onClick={() => setC1Command(CameraCommand.useStandardViewX)}>
+                  {'X Axis'}
+                </button>
+                <button className="control-button" onClick={() => setC1Command(CameraCommand.useStandardViewY)}>
+                  {'Y Axis'}
+                </button>
+                <button className="control-button" onClick={() => setC1Command(CameraCommand.useStandardViewZ)}>
+                  {'Z Axis'}
+                </button>
+              </div>
             </div>
 
             <MatrixEquation>
@@ -779,9 +817,9 @@ function App() {
             </div>
 
             <MatrixEquation>
-              <Matrix34Display label={"M'"} matrix={Mp} />
+              <Matrix44Display label={"M'"} matrix={Mp} />
               <span>{'*'}</span>
-              <Matrix34Display label={'M\u207B\u00B9'} matrix={M_inv} />
+              <Matrix44Display label={'M\u207B\u00B9'} matrix={M_inv} />
               <span className="big">{'='}</span>
               <Matrix44Display label={'camera 1 space to camera 2 space'} matrix={cam1ToCam2} />
             </MatrixEquation>
@@ -793,36 +831,36 @@ function App() {
                 {' encouraged to mess around with the positions of c1 and c2'}
                 {'. Watch how the above matrix changes!'}
               </p>
-              <p>
+              <div>
                 <button
                   className="control-button"
                   onClick={() => setC1Command(CameraCommand.setRotationToMatchC2)}>
                   {'Rotate c1 to match c2'}
-                </button>{' '}
+                </button>
                 <button
                   className="control-button"
                   onClick={() => setC1Command(CameraCommand.setPositionToMatchC2)}>
                   {'Translate c1 to match c2'}
-                </button>{' '}
+                </button>
                 <button className="control-button" onClick={() => setC1Command(CameraCommand.resetTransforms)}>
                   {'Reset c1'}
                 </button>
-              </p>
-              <p>
+              </div>
+              <div>
                 <button
                   className="control-button"
                   onClick={() => setC2Command(CameraCommand.setRotationToMatchC1)}>
                   {'Rotate c2 to match c1'}
-                </button>{' '}
+                </button>
                 <button
                   className="control-button"
                   onClick={() => setC2Command(CameraCommand.setPositionToMatchC1)}>
                   {'Translate c2 to match c1'}
-                </button>{' '}
+                </button>
                 <button className="control-button" onClick={() => setC2Command(CameraCommand.resetTransforms)}>
                   {'Reset c2'}
                 </button>
-              </p>
+              </div>
             </div>
 
             <h2 id="relative-rotation-and-translation" className="title-text">
@@ -854,21 +892,21 @@ function App() {
                 {'We can find out by giving both cameras the same position, but different '}
                 {'rotations (you may have to click a few times):'}
               </p>
-              <p>
+              <div>
                 <button
                   className="control-button"
                   onClick={() => setC1Command(CameraCommand.setPositionToMatchC2)}>
                   {'Translate c1 to match c2'}
-                </button>{' '}
+                </button>
                 <button
                   className="control-button"
                   onClick={() => setC1Command(CameraCommand.setRotationToIdentity)}>
                   {"Set c1's Rotation To Identity"}
-                </button>{' '}
+                </button>
                 <button className="control-button" onClick={() => setC1Command(CameraCommand.resetTransforms)}>
                   {'Reset c1'}
                 </button>
-              </p>
+              </div>
             </div>
 
             <MatrixEquation>
@@ -907,42 +945,42 @@ function App() {
                 <strong>{'note'}</strong>
                 {" T's value. Then, rotate c1:"}
               </p>
-              <p>
+              <div>
                 <button
                   className="control-button"
                   onClick={() => setC1Command(CameraCommand.setRotationToMatchC2)}>
                   {'Rotate c1 to match c2'}
-                </button>{' '}
+                </button>
                 <button
                   className="control-button"
                   onClick={() => setC1Command(CameraCommand.setPositionToMatchC2)}>
                   {'Translate c1 to match c2'}
                 </button>
-              </p>
+              </div>
               <p>
                 {'Did T change when you rotated c1? (Probably not!). '}
                 {'Reset, and this time, try rotating c2 instead:'}
               </p>
-              <p>
+              <div>
                 <button className="control-button" onClick={() => setC1Command(CameraCommand.resetTransforms)}>
                   {'Reset c1'}
-                </button>{' '}
+                </button>
                 <button className="control-button" onClick={() => setC2Command(CameraCommand.resetTransforms)}>
                   {'Reset c2'}
                 </button>
-              </p>
-              <p>
+              </div>
+              <div>
                 <button
                   className="control-button"
                   onClick={() => setC2Command(CameraCommand.setRotationToMatchC1)}>
                   {'Rotate c2 to match c1'}
-                </button>{' '}
+                </button>
                 <button
                   className="control-button"
                   onClick={() => setC1Command(CameraCommand.setPositionToMatchC2)}>
                   {'Translate c1 to match c2'}
                 </button>
-              </p>
+              </div>
               <p>{'Did T change when you rotated c2? (Probably!).'}</p>
               <p>
                 {"As you've probably already guessed, T is "}
@@ -999,11 +1037,11 @@ function App() {
                 </span>
                 {'.'}
               </p>
-              <p>
+              <div>
                 <button className="control-button" onClick={() => setGeneralPhrasing((prev) => !prev)}>
                   {'Say that again, but more ' + (generalPhrasing ? 'specifically' : 'generally')}
                 </button>
-              </p>
+              </div>
               <p>
                 {"If you're lost, don't worry, it took "}
                 <em>{'us'}</em>
@@ -1187,7 +1225,7 @@ function App() {
                 </strong>
               </p>
               <p>
-                {'These lines is known as '}
+                {'These lines are known as '}
                 <strong>{'epipolar lines'}</strong>
                 {', and they represent the places where a 2D point (on '}
                 <em>{'our'}</em>
@@ -1201,7 +1239,7 @@ function App() {
                 {" of the line going through the other camera's center and the object, onto our "}
                 {'camera\'s image plane. Try enabling these "lines of sight" below:'}
               </p>
-              <p>
+              <div>
                 <button
                   className="control-button"
                   onClick={() =>
@@ -1214,7 +1252,7 @@ function App() {
                     ? 'Hide Lines From Cameras To Object'
                     : 'Show Lines From Cameras To Object'}
                 </button>
-              </p>
+              </div>
             </div>
 
             <div className="body-text">
@@ -1233,7 +1271,7 @@ function App() {
 
             <div className="body-text">
               <p>{'Do also enable the point predictions below, for some nice color-coding:'}</p>
-              <p>
+              <div>
                 <button
                   className="control-button"
                   onClick={() =>
@@ -1242,7 +1280,7 @@ function App() {
                   {otherThingsToShow.c1PointPrediction
                     ? "Hide c1's Point Prediction"
                     : "Show c1's Point Prediction"}
-                </button>{' '}
+                </button>
                 <button
                   className="control-button"
                   onClick={() =>
@@ -1252,7 +1290,7 @@ function App() {
                     ? "Hide c2's Point Prediction"
                     : "Show c2's Point Prediction"}
                 </button>
-              </p>
+              </div>
               <p>
                 {"To get an epipolar line, left-multiply the point on the c1's image plane by F, "}
                 {"or c2's by F\u1D40:"}
@@ -1299,7 +1337,7 @@ function App() {
                 {'Here, we have a crude test (it only shows the y-intercepts on the left and right borders) '}
                 {'which checks if our calculated epipolar lines match up exactly with the "lines of sight":'}
               </p>
-              <p>
+              <div>
                 <button
                   className="control-button"
                   onClick={() =>
@@ -1312,7 +1350,7 @@ function App() {
                     ? 'Hide Epipolar Line Predictions'
                     : 'Show Epipolar Line Predictions'}
                 </button>
-              </p>
+              </div>
             </div>
 
             <h2 id="epipolar-constraint" className="title-text">
