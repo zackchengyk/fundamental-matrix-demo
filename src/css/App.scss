@@ -18,14 +18,20 @@ body,
 
 .App {
   position: absolute;
-  inset: 0;
-  padding: $gap;
+  inset: $gap;
 
   display: grid;
-  grid-template-areas: 'a b';
-  grid-template-columns: auto 3fr;
+  grid-template-areas: 'a b c';
+  grid-template-columns: 4fr $smaller-gap 9fr;
   place-items: stretch;
-  gap: $smaller-gap;
+  gap: $smaller-gap 0;
+}
+
+#ew-resize-bar {
+  height: 100%;
+  width: 100%;
+
+  cursor: ew-resize;
 }
 
 #scroll-outer {

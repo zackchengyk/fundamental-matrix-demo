@@ -138,9 +138,97 @@ function App() {
   const destinationPhraseA = generalPhrasing ? 'a destination' : "c2's"
   const destinationPhrase = generalPhrasing ? 'the destination' : "c2's"
 
+  // Dragging
+  const appRef = useRef<HTMLDivElement>(null)
+  const multiDragRef = {
+    demoWindowRef: useRef<HTMLDivElement>(null),
+    topRef: useRef<HTMLDivElement>(null),
+    botRef: useRef<HTMLDivElement>(null),
+  }
+  const [isDraggingLR, setIsDraggingLR] = useState<boolean>(false)
+  const [isDraggingTop, setIsDraggingTop] = useState<boolean>(false)
+  const [isDraggingBot, setIsDraggingBot] = useState<boolean>(false)
+  const [dragData, setDragData] = useState<[DOMRect, DOMRect, DOMRect] | null>(null)
+
+  function changeCursor(cursor: string) {
+    appRef.current!.style.cursor = cursor
+  }
+  function startDragLR() {
+    if (!appRef.current) return
+    setIsDraggingLR(true)
+    changeCursor('ew-resize')
+  }
+  function startDragTop() {
+    if (!multiDragRef.demoWindowRef.current || !multiDragRef.topRef.current || !multiDragRef.botRef.current) return
+    setIsDraggingTop(true)
+    setDragData([
+      multiDragRef.demoWindowRef.current.getBoundingClientRect(),
+      multiDragRef.topRef.current.getBoundingClientRect(),
+      multiDragRef.botRef.current.getBoundingClientRect(),
+    ])
+    changeCursor('ns-resize')
+  }
+  function startDragBot() {
+    if (!multiDragRef.demoWindowRef.current || !multiDragRef.topRef.current || !multiDragRef.botRef.current) return
+    setIsDraggingBot(true)
+    setDragData([
+      multiDragRef.demoWindowRef.current.getBoundingClientRect(),
+      multiDragRef.topRef.current.getBoundingClientRect(),
+      multiDragRef.botRef.current.getBoundingClientRect(),
+    ])
+    changeCursor('ns-resize')
+  }
+  function endDrag() {
+    setIsDraggingLR(false)
+    setIsDraggingTop(false)
+    setIsDraggingBot(false)
+    setDragData(null)
+    changeCursor('auto')
+  }
+
+  function onDrag(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+    if (isDraggingLR && appRef.current) {
+      // ==
+      e.preventDefault()
+      const app = appRef.current
+      const appRect = app.getBoundingClientRect()
+      // Hardcoded magic numbers:
+      // - 15px is the $gap between panels, and 7 + 8 = 15
+      // - 20px is the $smaller-gap from the edge of the browser viewport
+      const leftWidth = e.clientX - 7 - appRect.left
+      const rightWidth = appRect.right - e.clientX - 8
+      const newGridTemplateColumns = `${leftWidth}fr 15px ${rightWidth}fr`
+      app.style.gridTemplateColumns = newGridTemplateColumns
+      return
+    }
+
+    if (
+      (isDraggingTop || isDraggingBot) &&
+      multiDragRef.demoWindowRef.current &&
+      multiDragRef.topRef.current &&
+      multiDragRef.botRef.current &&
+      dragData
+    ) {
+      // ==
+      e.preventDefault()
+      // Hardcoded magic numbers:
+      // - 15px is the $smaller-gap between panels, and 7 + 8 = 15
+      // - 20px is the $gap from the edge of the browser viewport
+      const topHeight = isDraggingTop ? e.clientY - 9 - dragData[0].top : dragData[1].height
+      const botHeight = isDraggingTop ? dragData[2].height : dragData[0].bottom - e.clientY - 8
+      const midHeight = dragData[0].height - topHeight - botHeight - 30
+      const newGridTemplateRows = `${topHeight}fr 15px ${midHeight}fr 15px ${botHeight}fr`
+      multiDragRef.demoWindowRef.current.style.gridTemplateRows = newGridTemplateRows
+      return
+    }
+  }
+
   return (
-    <div className="App">
+    <div className="App" ref={appRef} onMouseUp={endDrag} onMouseLeave={endDrag} onMouseMove={onDrag}>
       <DemoWindow
+        ref={multiDragRef}
+        startDragTop={startDragTop}
+        startDragBot={startDragBot}
         {...{
           // Predictions
           x,
@@ -174,6 +262,8 @@ function App() {
           setC3Command,
         }}
       />
+
+      <div id="ew-resize-bar" onMouseDown={startDragLR} />
 
       <div id="scroll-outer">
         <div ref={scrollRef}>

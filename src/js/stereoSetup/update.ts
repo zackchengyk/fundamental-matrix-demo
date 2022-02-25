@@ -97,8 +97,6 @@ export function updateScene(time: DOMHighResTimeStamp, demo: DemoType): void {
       data.lookDirUpdateMode = LookDirUpdateMode.slerpToLookAt
     }
 
-    if (i === 1) console.log(data.lookDirUpdateMode)
-
     // Update angle of camera if necessary
     switch (data.lookDirUpdateMode) {
       case LookDirUpdateMode.maintainDirection: {
