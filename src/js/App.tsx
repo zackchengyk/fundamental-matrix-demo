@@ -214,9 +214,17 @@ function App() {
       // Hardcoded magic numbers:
       // - 15px is the $smaller-gap between panels, and 7 + 8 = 15
       // - 20px is the $gap from the edge of the browser viewport
-      const topHeight = isDraggingTop ? e.clientY - 9 - dragData[0].top : dragData[1].height
-      const botHeight = isDraggingTop ? dragData[2].height : dragData[0].bottom - e.clientY - 8
-      const midHeight = dragData[0].height - topHeight - botHeight - 30
+      let topHeight = Math.max(isDraggingTop ? e.clientY - 7 - dragData[0].top : dragData[1].height, 2)
+      let botHeight = Math.max(isDraggingTop ? dragData[2].height : dragData[0].bottom - e.clientY - 8, 2)
+      let midHeight = dragData[0].height - topHeight - botHeight - 30
+      if (midHeight < 2) {
+        midHeight = 2
+        if (isDraggingTop) {
+          topHeight = dragData[0].height - botHeight - 32
+        } else {
+          botHeight = dragData[0].height - topHeight - 32
+        }
+      }
       const newGridTemplateRows = `${topHeight}fr 15px ${midHeight}fr 15px ${botHeight}fr`
       multiDragRef.demoWindowRef.current.style.gridTemplateRows = newGridTemplateRows
       return
