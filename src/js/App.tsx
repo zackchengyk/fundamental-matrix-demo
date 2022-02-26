@@ -277,11 +277,13 @@ function App() {
       <div id="scroll-outer">
         <div ref={scrollRef}>
           <div id="scroll-inner">
-            <h1 className="title-text">{'CSCI 1430: Fundamental Matrix Workshop'}</h1>
+            <h1 className="title-text">{'CSCI 1430: Fundamental Matrix Demo'}</h1>
 
             <div className="body-text">
+              <p>{'Hello!'}</p>
+              <p>{'Welcome to the demo part of our camera geometry workshop :) '}</p>
               <p>
-                {"Hello! In this workshop, we'll walk through how to go from "}
+                {"On this page, we'll walk through how to go from "}
                 <strong>{'camera matrices'}</strong>
                 {' to the '}
                 <strong>{'fundamental matrix'}</strong>
@@ -290,8 +292,8 @@ function App() {
                 {'.'}
               </p>
               <p>
-                {'Epipolar geometry is a challenging concept to nail down, '}
-                {'so if you have any questions, please make sure to ask us TAs!'}
+                {'Camera (and epipolar) geometry can be challenging concepts to nail down, so '}
+                {'if you have any questions, please approach our awesome TAs on Ed!'}
               </p>
             </div>
 
